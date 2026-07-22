@@ -28,7 +28,7 @@ h1 {
 .input-area {
   display: flex;
   gap: 8px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .input-area input {
@@ -60,6 +60,37 @@ h1 {
   background-color: #357abd;
 }
 
+/* Блок с кнопками фильтра */
+.filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+/* Одна кнопка фильтра */
+.filter-btn {
+  flex: 1;
+  padding: 8px;
+  font-size: 14px;
+  background-color: #f0f4f8;
+  color: #555555;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  background-color: #e2e8f0;
+}
+
+/* Активная кнопка фильтра */
+.filter-btn.active {
+  background-color: #4a90e2;
+  color: white;
+  border-color: #4a90e2;
+}
+
 /* Список задач */
 #taskList {
   list-style: none;
@@ -78,6 +109,11 @@ h1 {
   background-color: #f8f9fa;
   border: 1px solid #e2e8f0;
   transition: background-color 0.2s;
+}
+
+/* Скрытая задача (не соответствует фильтру) */
+.task-item.hidden {
+  display: none;
 }
 
 /* Выполненная задача */

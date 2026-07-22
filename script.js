@@ -1,16 +1,18 @@
 const taskInput = document.getElementById('taskInput');
 const addBtn = document.getElementById('addBtn');
 const taskList = document.getElementById('taskList');
+const filterBtns = document.querySelectorAll('.filter-btn');
+
+// Текущий активный фильтр (по умолчанию — «Все»)
+let currentFilter = 'all';
 
 // --- Работа с localStorage ---
 
-// Загрузить задачи из localStorage (возвращает массив объектов)
 function loadTasks() {
   const saved = localStorage.getItem('tasks');
   return saved ? JSON.parse(saved) : [];
 }
 
-// Сохранить текущие задачи в localStorage
 function saveTasks() {
   const items = taskList.querySelectorAll('.task-item');
   const tasks = [];
@@ -25,6 +27,41 @@ function saveTasks() {
   localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
+// --- Фильтрация ---
+
+// Применяет текущий фильтр ко всем задачам
+function applyFilter() {
+  const items = taskList.querySelectorAll('.task-item');
+
+  items.forEach(function (li) {
+    const isDone = li.classList.contains('done');
+
+    if (currentFilter === 'all') {
+      li.classList.remove('hidden');
+    } else if (currentFilter === 'active') {
+      // Показываем только НЕвыполненные
+      li.classList.toggle('hidden', isDone);
+    } else if (currentFilter === 'done') {
+      // Показываем только выполненные
+      li.classList.toggle('hidden', !isDone);
+    }
+  });
+}
+
+// Обработчики кликов по кнопкам фильтра
+filterBtns.forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    // Убираем класс active у всех кнопок
+    filterBtns.forEach(function (b) { b.classList.remove('active'); });
+    // Добавляем active на нажатую
+    btn.classList.add('active');
+    // Запоминаем выбранный фильтр
+    currentFilter = btn.dataset.filter;
+    // Применяем фильтр
+    applyFilter();
+  });
+});
+
 // --- Создание элемента задачи ---
 
 function createTaskElement(text, done) {
@@ -37,7 +74,8 @@ function createTaskElement(text, done) {
   span.textContent = text;
   span.addEventListener('click', function () {
     li.classList.toggle('done');
-    saveTasks(); // Сохраняем после отметки выполненной
+    saveTasks();
+    applyFilter(); // Перефильтруем после смены статуса
   });
 
   const deleteBtn = document.createElement('button');
@@ -45,7 +83,7 @@ function createTaskElement(text, done) {
   deleteBtn.textContent = '×';
   deleteBtn.addEventListener('click', function () {
     li.remove();
-    saveTasks(); // Сохраняем после удаления
+    saveTasks();
   });
 
   li.appendChild(span);
@@ -65,7 +103,8 @@ function addTask() {
 
   const li = createTaskElement(text, false);
   taskList.appendChild(li);
-  saveTasks(); // Сохраняем после добавления
+  saveTasks();
+  applyFilter(); // Применяем фильтр к новой задаче
 
   taskInput.value = '';
   taskInput.focus();
@@ -77,6 +116,9 @@ loadTasks().forEach(function (task) {
   const li = createTaskElement(task.text, task.done);
   taskList.appendChild(li);
 });
+
+// Применяем фильтр после загрузки
+applyFilter();
 
 // --- Обработчики событий ---
 
