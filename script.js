@@ -67,19 +67,24 @@ filterBtns.forEach(function (btn) {
 
 // --- Создание элемента задачи ---
 
+// Глобальный счётчик для уникальных id чекбоксов
+let taskIdCounter = 0;
+
 function createTaskElement(text, done) {
   const li = document.createElement('li');
   li.classList.add('task-item');
   if (done) li.classList.add('done');
 
-  // Чекбокс слева от текста
+  // Уникальный id для связки checkbox и label
+  const checkboxId = 'task-' + taskIdCounter++;
+
   const checkbox = document.createElement('input');
   checkbox.type = 'checkbox';
   checkbox.classList.add('task-checkbox');
-  checkbox.checked = done; // Если задача уже выполнена — ставим птичку
+  checkbox.checked = done;
+  checkbox.id = checkboxId; // Присваиваем id чекбоксу
 
   checkbox.addEventListener('change', function () {
-    // Переключаем класс done на задаче в зависимости от состояния чекбокса
     li.classList.toggle('done', checkbox.checked);
     saveTasks();
     applyFilter();
@@ -90,6 +95,14 @@ function createTaskElement(text, done) {
   span.classList.add('task-text');
   span.textContent = text;
 
+  // <label> оборачивает чекбокс и текст — клик в любом месте переключает чекбокс
+  const label = document.createElement('label');
+  label.htmlFor = checkboxId; // Связываем label с нужным чекбоксом
+  label.classList.add('task-label');
+  label.appendChild(checkbox);
+  label.appendChild(span);
+
+  // Крестик остаётся СНАРУЖИ label — он работает независимо
   const deleteBtn = document.createElement('button');
   deleteBtn.classList.add('delete-btn');
   deleteBtn.textContent = '×';
@@ -99,9 +112,8 @@ function createTaskElement(text, done) {
     updateCounter();
   });
 
-  li.appendChild(checkbox);  // 1. чекбокс
-  li.appendChild(span);      // 2. текст
-  li.appendChild(deleteBtn); // 3. крестик
+  li.appendChild(label);     // 1. label (внутри: чекбокс + текст)
+  li.appendChild(deleteBtn); // 2. крестик снаружи
   return li;
 }
 
