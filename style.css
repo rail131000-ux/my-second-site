@@ -111,7 +111,7 @@ h1 {
   transition: background-color 0.2s;
 }
 
-/* Скрытая задача (не соответствует фильтру) */
+/* Скрытая задача */
 .task-item.hidden {
   display: none;
 }
@@ -143,4 +143,12 @@ h1 {
 
 .delete-btn:hover {
   color: #c53030;
+}
+
+/* Счётчик задач */
+.counter {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #888888;
 }
