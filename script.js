@@ -29,7 +29,6 @@ function saveTasks() {
 
 function updateCounter() {
   const all = taskList.querySelectorAll('.task-item');
-  // Считаем задачи БЕЗ класса done
   const activeCount = taskList.querySelectorAll('.task-item:not(.done)').length;
 
   if (all.length === 0) {
@@ -73,15 +72,23 @@ function createTaskElement(text, done) {
   li.classList.add('task-item');
   if (done) li.classList.add('done');
 
+  // Чекбокс слева от текста
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.classList.add('task-checkbox');
+  checkbox.checked = done; // Если задача уже выполнена — ставим птичку
+
+  checkbox.addEventListener('change', function () {
+    // Переключаем класс done на задаче в зависимости от состояния чекбокса
+    li.classList.toggle('done', checkbox.checked);
+    saveTasks();
+    applyFilter();
+    updateCounter();
+  });
+
   const span = document.createElement('span');
   span.classList.add('task-text');
   span.textContent = text;
-  span.addEventListener('click', function () {
-    li.classList.toggle('done');
-    saveTasks();
-    applyFilter();
-    updateCounter(); // Обновляем счётчик после смены статуса
-  });
 
   const deleteBtn = document.createElement('button');
   deleteBtn.classList.add('delete-btn');
@@ -89,11 +96,12 @@ function createTaskElement(text, done) {
   deleteBtn.addEventListener('click', function () {
     li.remove();
     saveTasks();
-    updateCounter(); // Обновляем счётчик после удаления
+    updateCounter();
   });
 
-  li.appendChild(span);
-  li.appendChild(deleteBtn);
+  li.appendChild(checkbox);  // 1. чекбокс
+  li.appendChild(span);      // 2. текст
+  li.appendChild(deleteBtn); // 3. крестик
   return li;
 }
 
@@ -110,7 +118,7 @@ function addTask() {
   taskList.appendChild(li);
   saveTasks();
   applyFilter();
-  updateCounter(); // Обновляем счётчик после добавления
+  updateCounter();
 
   taskInput.value = '';
   taskInput.focus();
@@ -124,7 +132,7 @@ loadTasks().forEach(function (task) {
 });
 
 applyFilter();
-updateCounter(); // Показываем счётчик сразу при загрузке
+updateCounter();
 
 // --- Обработчики событий ---
 
