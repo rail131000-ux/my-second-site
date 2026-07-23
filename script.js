@@ -100,6 +100,75 @@ function removeTask(li) {
   }, { once: true });
 }
 
+// ========== Drag and Drop ==========
+
+// Запоминаем: какую задачу тащим прямо сейчас
+let draggedItem = null;
+// Запоминаем: над какой задачей находится курсор
+let dragOverItem = null;
+
+function addDragListeners(li) {
+  // Делаем элемент перетаскиваемым
+  li.setAttribute('draggable', 'true');
+
+  // Начало перетаскивания
+  li.addEventListener('dragstart', function () {
+    draggedItem = li;
+    // setTimeout нужен чтобы CSS-класс применился ПОСЛЕ того
+    // как браузер сделал «снимок» элемента для перетаскивания
+    setTimeout(function () {
+      li.classList.add('dragging');
+    }, 0);
+  });
+
+  // Конец перетаскивания (отпустил кнопку мыши)
+  li.addEventListener('dragend', function () {
+    li.classList.remove('dragging');
+    // Убираем подсветку со всех элементов
+    taskList.querySelectorAll('.task-item').forEach(function (item) {
+      item.classList.remove('drag-over');
+    });
+    draggedItem = null;
+    dragOverItem = null;
+  });
+
+  // Курсор пролетает над этим элементом во время перетаскивания
+  li.addEventListener('dragover', function (event) {
+    // Без этой строки событие drop не сработает!
+    event.preventDefault();
+
+    if (li === draggedItem) return; // не реагируем на самого себя
+
+    // Убираем подсветку с предыдущего элемента
+    if (dragOverItem) dragOverItem.classList.remove('drag-over');
+
+    dragOverItem = li;
+    li.classList.add('drag-over');
+  });
+
+  // Отпустили задачу над этим элементом
+  li.addEventListener('drop', function (event) {
+    event.preventDefault();
+    if (!draggedItem || li === draggedItem) return;
+
+    // getBoundingClientRect() возвращает размер и позицию элемента на экране
+    const rect = li.getBoundingClientRect();
+    // Середина элемента по вертикали
+    const midY = rect.top + rect.height / 2;
+
+    if (event.clientY < midY) {
+      // Курсор в верхней половине — вставляем ДО этого элемента
+      taskList.insertBefore(draggedItem, li);
+    } else {
+      // Курсор в нижней половине — вставляем ПОСЛЕ этого элемента
+      taskList.insertBefore(draggedItem, li.nextSibling);
+    }
+
+    // Сохраняем новый порядок в localStorage
+    saveTasks();
+  });
+}
+
 // ========== Создание элемента задачи ==========
 // animate: true — для новых задач (с анимацией)
 // animate: false — для загрузки из localStorage (без анимации)
@@ -111,10 +180,12 @@ function createTaskElement(text, done, animate) {
   li.classList.add('task-item');
   if (done) li.classList.add('done');
 
-  // Добавляем класс анимации только если animate === true
   if (animate) {
     li.classList.add('task-item--animated');
   }
+
+  // Подключаем drag and drop к каждому элементу
+  addDragListeners(li);
 
   const checkboxId = 'task-' + taskIdCounter++;
 
@@ -171,7 +242,7 @@ function createTaskElement(text, done, animate) {
     function saveEdit() {
       const newText = input.value.trim();
       if (newText === '') {
-        alert('Текст задачи не может бьть пустым!');
+        alert('Текст задачи не может быть пустым!');
         input.focus();
         return;
       }
@@ -224,7 +295,6 @@ function addTask() {
     return;
   }
 
-  // animate: true — новая задача, анимируем
   const li = createTaskElement(text, false, true);
   taskList.appendChild(li);
   saveTasks();
@@ -238,7 +308,6 @@ function addTask() {
 // ========== Загрузка при открытии страницы ==========
 
 loadTasks().forEach(function (task) {
-  // animate: false — задача из localStorage, без анимации
   const li = createTaskElement(task.text, task.done, false);
   taskList.appendChild(li);
 });

@@ -209,8 +209,8 @@ h1 {
   margin-bottom: 8px;
   background-color: var(--bg-task);
   border: 1px solid var(--border-task);
-  transition: background-color 0.2s;
-  /* animation убрана отсюда — теперь только через отдельный класс */
+  transition: background-color 0.2s, opacity 0.2s, transform 0.2s;
+  cursor: grab; /* лапка — подсказка что элемент можно перетащить */
 }
 
 .task-item.hidden {
@@ -220,6 +220,19 @@ h1 {
 /* ===== Анимация появления — только для новых задач ===== */
 .task-item--animated {
   animation: task-appear 0.3s ease;
+}
+
+/* ===== Задача, которую сейчас тащим ===== */
+.task-item.dragging {
+  opacity: 0.4;     /* полупрозрачная — видно, что место занято */
+  cursor: grabbing; /* курсор меняется на зажатую лапку */
+}
+
+/* ===== Задача, над которой находится курсор во время перетаскивания ===== */
+.task-item.drag-over {
+  border-color: var(--accent);        /* синяя рамка */
+  background-color: var(--bg-filter); /* лёгкая подсветка фона */
+  transform: scale(1.01);             /* чуть увеличивается */
 }
 
 /* ===== Задача в процессе удаления ===== */
