@@ -301,11 +301,6 @@ h1 {
   transition: color 0.2s, transform 0.2s;
   flex-shrink: 0;
   padding: 4px 6px;
-  opacity: 0;
-}
-
-/* Показываем кнопку редактирования при наведении на задачу */
-.task-item:hover .edit-btn {
   opacity: 1;
 }
 
