@@ -89,6 +89,20 @@ filterBtns.forEach(function (btn) {
   });
 });
 
+// ========== Удаление с анимацией ==========
+
+function removeTask(li) {
+  // Шаг 1: добавляем класс — CSS запускает анимацию исчезновения
+  li.classList.add('removing');
+
+  // Шаг 2: ждём окончания анимации, только потом удаляем из DOM
+  li.addEventListener('animationend', function () {
+    li.remove();
+    saveTasks();
+    updateCounter();
+  }, { once: true }); // once: true — слушатель сработает только один раз и удалится
+}
+
 // ========== Создание элемента задачи ==========
 
 let taskIdCounter = 0;
@@ -131,31 +145,25 @@ function createTaskElement(text, done) {
   editBtn.title = 'Редактировать задачу';
 
   editBtn.addEventListener('click', function () {
-    // Берём текущий текст задачи
     const currentText = span.textContent;
 
-    // Создаём поле ввода и заполняем текущим текстом
     const input = document.createElement('input');
     input.type = 'text';
     input.classList.add('edit-input');
     input.value = currentText;
 
-    // Скрываем span и показываем input вместо него
     span.style.display = 'none';
     label.insertBefore(input, span);
     input.focus();
     input.select();
 
-    // Скрываем кнопку редактирования пока редактируем
     editBtn.style.display = 'none';
 
-    // Создаём кнопку сохранения
     const saveBtn = document.createElement('button');
     saveBtn.classList.add('save-btn');
     saveBtn.textContent = '✅';
     saveBtn.title = 'Сохранить изменения';
 
-    // Функция сохранения нового текста
     function saveEdit() {
       const newText = input.value.trim();
       if (newText === '') {
@@ -173,12 +181,10 @@ function createTaskElement(text, done) {
 
     saveBtn.addEventListener('click', saveEdit);
 
-    // Сохранение по Enter
     input.addEventListener('keydown', function (event) {
       if (event.key === 'Enter') {
         saveEdit();
       }
-      // Отмена по Escape — восстанавливаем исходный текст
       if (event.key === 'Escape') {
         span.style.display = '';
         input.remove();
@@ -187,7 +193,6 @@ function createTaskElement(text, done) {
       }
     });
 
-    // Вставляем кнопку сохранения перед кнопкой удаления
     li.insertBefore(saveBtn, deleteBtn);
   });
 
@@ -197,9 +202,7 @@ function createTaskElement(text, done) {
   deleteBtn.classList.add('delete-btn');
   deleteBtn.textContent = '×';
   deleteBtn.addEventListener('click', function () {
-    li.remove();
-    saveTasks();
-    updateCounter();
+    removeTask(li); // вместо li.remove() — вызываем функцию с анимацией
   });
 
   li.appendChild(label);
