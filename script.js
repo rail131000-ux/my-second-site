@@ -92,25 +92,29 @@ filterBtns.forEach(function (btn) {
 // ========== Удаление с анимацией ==========
 
 function removeTask(li) {
-  // Шаг 1: добавляем класс — CSS запускает анимацию исчезновения
   li.classList.add('removing');
-
-  // Шаг 2: ждём окончания анимации, только потом удаляем из DOM
   li.addEventListener('animationend', function () {
     li.remove();
     saveTasks();
     updateCounter();
-  }, { once: true }); // once: true — слушатель сработает только один раз и удалится
+  }, { once: true });
 }
 
 // ========== Создание элемента задачи ==========
+// animate: true — для новых задач (с анимацией)
+// animate: false — для загрузки из localStorage (без анимации)
 
 let taskIdCounter = 0;
 
-function createTaskElement(text, done) {
+function createTaskElement(text, done, animate) {
   const li = document.createElement('li');
   li.classList.add('task-item');
   if (done) li.classList.add('done');
+
+  // Добавляем класс анимации только если animate === true
+  if (animate) {
+    li.classList.add('task-item--animated');
+  }
 
   const checkboxId = 'task-' + taskIdCounter++;
 
@@ -167,7 +171,7 @@ function createTaskElement(text, done) {
     function saveEdit() {
       const newText = input.value.trim();
       if (newText === '') {
-        alert('Текст задачи не может быть пустым!');
+        alert('Текст задачи не может бьть пустым!');
         input.focus();
         return;
       }
@@ -202,7 +206,7 @@ function createTaskElement(text, done) {
   deleteBtn.classList.add('delete-btn');
   deleteBtn.textContent = '×';
   deleteBtn.addEventListener('click', function () {
-    removeTask(li); // вместо li.remove() — вызываем функцию с анимацией
+    removeTask(li);
   });
 
   li.appendChild(label);
@@ -220,7 +224,8 @@ function addTask() {
     return;
   }
 
-  const li = createTaskElement(text, false);
+  // animate: true — новая задача, анимируем
+  const li = createTaskElement(text, false, true);
   taskList.appendChild(li);
   saveTasks();
   applyFilter();
@@ -233,7 +238,8 @@ function addTask() {
 // ========== Загрузка при открытии страницы ==========
 
 loadTasks().forEach(function (task) {
-  const li = createTaskElement(task.text, task.done);
+  // animate: false — задача из localStorage, без анимации
+  const li = createTaskElement(task.text, task.done, false);
   taskList.appendChild(li);
 });
 

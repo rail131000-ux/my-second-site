@@ -210,11 +210,16 @@ h1 {
   background-color: var(--bg-task);
   border: 1px solid var(--border-task);
   transition: background-color 0.2s;
-  animation: task-appear 0.3s ease;
+  /* animation убрана отсюда — теперь только через отдельный класс */
 }
 
 .task-item.hidden {
   display: none;
+}
+
+/* ===== Анимация появления — только для новых задач ===== */
+.task-item--animated {
+  animation: task-appear 0.3s ease;
 }
 
 /* ===== Задача в процессе удаления ===== */
