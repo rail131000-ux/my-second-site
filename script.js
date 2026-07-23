@@ -21,11 +21,9 @@ function applyTheme(isDark) {
   }
 }
 
-// Загружаем сохранённую тему при старте страницы
 const savedTheme = localStorage.getItem('theme');
 applyTheme(savedTheme === 'dark');
 
-// Клик на кнопку — переключаем тему и сохраняем выбор
 themeToggle.addEventListener('click', function () {
   const isDark = document.body.classList.contains('dark');
   applyTheme(!isDark);
@@ -125,6 +123,76 @@ function createTaskElement(text, done) {
   label.appendChild(checkbox);
   label.appendChild(span);
 
+  // ========== Кнопка редактирования ==========
+
+  const editBtn = document.createElement('button');
+  editBtn.classList.add('edit-btn');
+  editBtn.textContent = '✏️';
+  editBtn.title = 'Редактировать задачу';
+
+  editBtn.addEventListener('click', function () {
+    // Берём текущий текст задачи
+    const currentText = span.textContent;
+
+    // Создаём поле ввода и заполняем текущим текстом
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.classList.add('edit-input');
+    input.value = currentText;
+
+    // Скрываем span и показываем input вместо него
+    span.style.display = 'none';
+    label.insertBefore(input, span);
+    input.focus();
+    input.select();
+
+    // Скрываем кнопку редактирования пока редактируем
+    editBtn.style.display = 'none';
+
+    // Создаём кнопку сохранения
+    const saveBtn = document.createElement('button');
+    saveBtn.classList.add('save-btn');
+    saveBtn.textContent = '✅';
+    saveBtn.title = 'Сохранить изменения';
+
+    // Функция сохранения нового текста
+    function saveEdit() {
+      const newText = input.value.trim();
+      if (newText === '') {
+        alert('Текст задачи не может быть пустым!');
+        input.focus();
+        return;
+      }
+      span.textContent = newText;
+      span.style.display = '';
+      input.remove();
+      saveBtn.remove();
+      editBtn.style.display = '';
+      saveTasks();
+    }
+
+    saveBtn.addEventListener('click', saveEdit);
+
+    // Сохранение по Enter
+    input.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        saveEdit();
+      }
+      // Отмена по Escape — восстанавливаем исходный текст
+      if (event.key === 'Escape') {
+        span.style.display = '';
+        input.remove();
+        saveBtn.remove();
+        editBtn.style.display = '';
+      }
+    });
+
+    // Вставляем кнопку сохранения перед кнопкой удаления
+    li.insertBefore(saveBtn, deleteBtn);
+  });
+
+  // ========== Кнопка удаления ==========
+
   const deleteBtn = document.createElement('button');
   deleteBtn.classList.add('delete-btn');
   deleteBtn.textContent = '×';
@@ -135,6 +203,7 @@ function createTaskElement(text, done) {
   });
 
   li.appendChild(label);
+  li.appendChild(editBtn);
   li.appendChild(deleteBtn);
   return li;
 }
