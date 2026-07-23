@@ -3,10 +3,36 @@ const addBtn = document.getElementById('addBtn');
 const taskList = document.getElementById('taskList');
 const filterBtns = document.querySelectorAll('.filter-btn');
 const counter = document.getElementById('counter');
+const themeToggle = document.getElementById('themeToggle');
 
 let currentFilter = 'all';
 
-// --- Работа с localStorage ---
+// ========== Тёмная тема ==========
+
+function applyTheme(isDark) {
+  if (isDark) {
+    document.body.classList.add('dark');
+    themeToggle.textContent = '☀️';
+    themeToggle.title = 'Переключить на светлую тему';
+  } else {
+    document.body.classList.remove('dark');
+    themeToggle.textContent = '🌙';
+    themeToggle.title = 'Переключить на тёмную тему';
+  }
+}
+
+// Загружаем сохранённую тему при старте страницы
+const savedTheme = localStorage.getItem('theme');
+applyTheme(savedTheme === 'dark');
+
+// Клик на кнопку — переключаем тему и сохраняем выбор
+themeToggle.addEventListener('click', function () {
+  const isDark = document.body.classList.contains('dark');
+  applyTheme(!isDark);
+  localStorage.setItem('theme', !isDark ? 'dark' : 'light');
+});
+
+// ========== Работа с localStorage (задачи) ==========
 
 function loadTasks() {
   const saved = localStorage.getItem('tasks');
@@ -25,7 +51,7 @@ function saveTasks() {
   localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
-// --- Счётчик ---
+// ========== Счётчик ==========
 
 function updateCounter() {
   const all = taskList.querySelectorAll('.task-item');
@@ -40,7 +66,7 @@ function updateCounter() {
   }
 }
 
-// --- Фильтрация ---
+// ========== Фильтрация ==========
 
 function applyFilter() {
   const items = taskList.querySelectorAll('.task-item');
@@ -65,9 +91,8 @@ filterBtns.forEach(function (btn) {
   });
 });
 
-// --- Создание элемента задачи ---
+// ========== Создание элемента задачи ==========
 
-// Глобальный счётчик для уникальных id чекбоксов
 let taskIdCounter = 0;
 
 function createTaskElement(text, done) {
@@ -75,14 +100,13 @@ function createTaskElement(text, done) {
   li.classList.add('task-item');
   if (done) li.classList.add('done');
 
-  // Уникальный id для связки checkbox и label
   const checkboxId = 'task-' + taskIdCounter++;
 
   const checkbox = document.createElement('input');
   checkbox.type = 'checkbox';
   checkbox.classList.add('task-checkbox');
   checkbox.checked = done;
-  checkbox.id = checkboxId; // Присваиваем id чекбоксу
+  checkbox.id = checkboxId;
 
   checkbox.addEventListener('change', function () {
     li.classList.toggle('done', checkbox.checked);
@@ -95,14 +119,12 @@ function createTaskElement(text, done) {
   span.classList.add('task-text');
   span.textContent = text;
 
-  // <label> оборачивает чекбокс и текст — клик в любом месте переключает чекбокс
   const label = document.createElement('label');
-  label.htmlFor = checkboxId; // Связываем label с нужным чекбоксом
+  label.htmlFor = checkboxId;
   label.classList.add('task-label');
   label.appendChild(checkbox);
   label.appendChild(span);
 
-  // Крестик остаётся СНАРУЖИ label — он работает независимо
   const deleteBtn = document.createElement('button');
   deleteBtn.classList.add('delete-btn');
   deleteBtn.textContent = '×';
@@ -112,12 +134,12 @@ function createTaskElement(text, done) {
     updateCounter();
   });
 
-  li.appendChild(label);     // 1. label (внутри: чекбокс + текст)
-  li.appendChild(deleteBtn); // 2. крестик снаружи
+  li.appendChild(label);
+  li.appendChild(deleteBtn);
   return li;
 }
 
-// --- Добавление новой задачи ---
+// ========== Добавление новой задачи ==========
 
 function addTask() {
   const text = taskInput.value.trim();
@@ -136,7 +158,7 @@ function addTask() {
   taskInput.focus();
 }
 
-// --- Загрузка при открытии страницы ---
+// ========== Загрузка при открытии страницы ==========
 
 loadTasks().forEach(function (task) {
   const li = createTaskElement(task.text, task.done);
@@ -146,7 +168,7 @@ loadTasks().forEach(function (task) {
 applyFilter();
 updateCounter();
 
-// --- Обработчики событий ---
+// ========== Обработчики событий ==========
 
 addBtn.addEventListener('click', addTask);
 
