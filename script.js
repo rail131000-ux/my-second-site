@@ -5,8 +5,28 @@ const filterBtns = document.querySelectorAll('.filter-btn');
 const counter = document.getElementById('counter');
 const themeToggle = document.getElementById('themeToggle');
 const clearDoneBtn = document.getElementById('clearDoneBtn');
+const charCounter = document.getElementById('charCounter');
 
+const MAX_LENGTH = 100;
 let currentFilter = 'all';
+
+// ========== Счётчик символов ==========
+
+taskInput.addEventListener('input', function () {
+  const len = taskInput.value.length;
+  charCounter.textContent = len + ' / ' + MAX_LENGTH;
+
+  // Меняем цвет когда осталось мало символов
+  if (len >= MAX_LENGTH) {
+    charCounter.classList.add('char-counter--limit');
+    charCounter.classList.remove('char-counter--warning');
+  } else if (len >= MAX_LENGTH * 0.8) {
+    charCounter.classList.add('char-counter--warning');
+    charCounter.classList.remove('char-counter--limit');
+  } else {
+    charCounter.classList.remove('char-counter--warning', 'char-counter--limit');
+  }
+});
 
 // ========== Тёмная тема ==========
 
@@ -50,7 +70,7 @@ function saveTasks() {
   localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
-// ========== Счётчик и видимость кнопки ==========
+// ========== Счётчик задач и видимость кнопки ==========
 
 function updateCounter() {
   const all = taskList.querySelectorAll('.task-item');
@@ -65,7 +85,6 @@ function updateCounter() {
     counter.textContent = 'Осталось задач: ' + activeCount;
   }
 
-  // Показываем кнопку только если есть выполненные задачи
   clearDoneBtn.style.display = doneItems.length > 0 ? 'block' : 'none';
 }
 
@@ -108,18 +127,15 @@ function removeTask(li) {
 // ========== Очистка выполненных задач ==========
 
 clearDoneBtn.addEventListener('click', function () {
-  // Спрашиваем подтверждение перед удалением
   const confirmed = confirm('Удалить все выполненные задачи?');
   if (!confirmed) return;
 
   const doneItems = taskList.querySelectorAll('.task-item.done');
 
-  // Запускаем анимацию для каждой выполненной задачи
   doneItems.forEach(function (li) {
     li.classList.add('removing');
     li.addEventListener('animationend', function () {
       li.remove();
-      // После удаления последнего элемента — сохраняем и обновляем счётчик
       saveTasks();
       updateCounter();
     }, { once: true });
@@ -226,6 +242,7 @@ function createTaskElement(text, done, animate) {
     input.type = 'text';
     input.classList.add('edit-input');
     input.value = currentText;
+    input.maxLength = MAX_LENGTH;
 
     span.style.display = 'none';
     label.insertBefore(input, span);
@@ -300,6 +317,9 @@ function addTask() {
   updateCounter();
 
   taskInput.value = '';
+  // Сбрасываем счётчик символов после добавления задачи
+  charCounter.textContent = '0 / ' + MAX_LENGTH;
+  charCounter.classList.remove('char-counter--warning', 'char-counter--limit');
   taskInput.focus();
 }
 
