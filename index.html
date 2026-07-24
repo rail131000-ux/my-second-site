@@ -12,13 +12,17 @@
 
       <h1>Мой список задач</h1>
 
-      <!--
-        Макет:
-        [ textarea (flex:1, align-self:stretch) ]  [ Колонка: [Добавить] / [Селект] ]
-        Счётчик символов под textarea
-      -->
+      <!-- Блок ввода -->
       <div class="input-area">
 
+        <!-- Селект приоритета: фиксированная ширина слева -->
+        <select id="prioritySelect" class="priority-select" title="Приоритет">
+          <option value="low">🟢 Низкий</option>
+          <option value="medium" selected>🟡 Средний</option>
+          <option value="high">🔴 Высокий</option>
+        </select>
+
+        <!-- Поле ввода + счётчик -->
         <div class="input-wrapper">
           <textarea
             id="taskInput"
@@ -30,15 +34,8 @@
           <span id="charCounter" class="char-counter">0 / 100</span>
         </div>
 
-        <!-- Правая колонка: кнопка сверху, селект снизу -->
-        <div class="input-actions">
-          <button id="addBtn">Добавить</button>
-          <select id="prioritySelect" class="priority-select" title="Приоритет задачи">
-            <option value="low">🟢 Низкий</option>
-            <option value="medium" selected>🟡 Средний</option>
-            <option value="high">🔴 Высокий</option>
-          </select>
-        </div>
+        <!-- Кнопка -->
+        <button id="addBtn" class="add-btn">Добавить</button>
 
       </div>
 
