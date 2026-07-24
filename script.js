@@ -108,6 +108,10 @@ function removeTask(li) {
 // ========== Очистка выполненных задач ==========
 
 clearDoneBtn.addEventListener('click', function () {
+  // Спрашиваем подтверждение перед удалением
+  const confirmed = confirm('Удалить все выполненные задачи?');
+  if (!confirmed) return;
+
   const doneItems = taskList.querySelectorAll('.task-item.done');
 
   // Запускаем анимацию для каждой выполненной задачи
