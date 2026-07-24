@@ -62,7 +62,6 @@ body.dark {
   --save-hover:      #48bb78;
 
   --shadow:          0 4px 24px rgba(0,0,0,0.4);
-
   --toggle-bg:       #2d3650;
   --toggle-color:    #a0b3cc;
 }
@@ -101,14 +100,12 @@ h1 {
 
 .theme-toggle {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 20px; right: 20px;
   background: var(--toggle-bg);
   color: var(--toggle-color);
   border: none;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 36px; height: 36px;
   font-size: 17px;
   cursor: pointer;
   display: flex;
@@ -126,12 +123,11 @@ h1 {
   margin-bottom: 14px;
 }
 
-/* ===== Табы приоритета ===== */
+/* Табы приоритета */
 .priority-tabs {
   display: flex;
   gap: 6px;
 }
-
 .priority-tab {
   flex: 1;
   padding: 7px 4px;
@@ -144,28 +140,53 @@ h1 {
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.18s;
-  white-space: nowrap;
 }
-.priority-tab:hover {
-  background-color: var(--bg-filter-hover);
-  color: var(--text-primary);
-}
+.priority-tab:hover { background-color: var(--bg-filter-hover); color: var(--text-primary); }
 .priority-tab[data-priority="low"].active    { background-color: var(--tab-low-color);  border-color: var(--tab-low-color);  color: #fff; }
 .priority-tab[data-priority="medium"].active  { background-color: var(--tab-med-color);  border-color: var(--tab-med-color);  color: #fff; }
 .priority-tab[data-priority="high"].active    { background-color: var(--tab-high-color); border-color: var(--tab-high-color); color: #fff; }
 
-/* ===== Обёртка textarea + счётчик ===== */
-.textarea-wrapper {
-  position: relative;   /* нужно, чтобы счётчик позиционировался внутри */
-  width: 100%;
+/* Поле заголовка */
+.field-wrapper {
+  position: relative;
 }
 
-.task-textarea {
+.title-input {
   width: 100%;
-  /* нижний паддинг увеличен, чтобы текст не перекрывал счётчик */
-  min-height: 80px;
-  padding: 11px 14px 28px 14px;
+  height: 44px;
+  padding: 0 70px 0 14px;
   font-size: 15px;
+  font-family: inherit;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  transition: border-color 0.2s, background-color 0.3s;
+}
+.title-input::placeholder { color: var(--text-secondary); }
+.title-input:focus         { border-color: var(--border-focus); }
+
+/* Счётчик заголовка — внутри поля, справа */
+.char-counter {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--text-counter);
+  pointer-events: none;
+  transition: color 0.2s;
+}
+.char-counter--warning { color: #dd8800; }
+.char-counter--limit   { color: var(--delete-color); font-weight: 600; }
+
+/* Текстареа описания */
+.desc-textarea {
+  width: 100%;
+  min-height: 72px;
+  padding: 11px 14px;
+  font-size: 14px;
   font-family: inherit;
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
@@ -177,23 +198,10 @@ h1 {
   color: var(--text-primary);
   transition: border-color 0.2s, background-color 0.3s;
 }
-.task-textarea::placeholder { color: var(--text-secondary); }
-.task-textarea:focus         { border-color: var(--border-focus); }
+.desc-textarea::placeholder { color: var(--text-secondary); }
+.desc-textarea:focus         { border-color: var(--border-focus); }
 
-/* Счётчик внутри поля */
-.char-counter {
-  position: absolute;
-  bottom: 8px;
-  right: 12px;
-  font-size: 11px;
-  color: var(--text-counter);
-  pointer-events: none;   /* не мешает кликам по textarea */
-  transition: color 0.2s;
-}
-.char-counter--warning { color: #dd8800; }
-.char-counter--limit   { color: var(--delete-color); font-weight: 600; }
-
-/* Кнопка на всю ширину */
+/* Кнопка Добавить */
 .add-btn {
   width: 100%;
   height: 42px;
@@ -216,7 +224,6 @@ h1 {
   gap: 6px;
   margin-bottom: 20px;
 }
-
 .filter-btn {
   flex: 1;
   padding: 8px 4px;
@@ -243,39 +250,48 @@ h1 {
   gap: 6px;
 }
 
+/* ===== Карточка задачи ===== */
 .task-item {
-  display: flex;
-  align-items: center;
-  padding: 4px 10px 4px 4px;
   border-radius: var(--radius);
   background-color: var(--bg-task);
   border: 1.5px solid var(--border);
-  transition: background-color 0.2s, opacity 0.2s, transform 0.2s, border-color 0.2s;
-  cursor: grab;
+  overflow: hidden;
+  transition: border-color 0.2s, background-color 0.2s;
+  cursor: default;
 }
 
 .task-item.hidden    { display: none; }
 .task-item--animated { animation: task-appear 0.25s ease; }
-.task-item.dragging  { opacity: 0.4; cursor: grabbing; }
+.task-item.dragging  { opacity: 0.4; }
 .task-item.removing  { animation: task-disappear 0.28s ease forwards; }
 
 .task-item.drag-over {
   border-color: var(--accent);
   background-color: var(--bg-filter);
-  transform: scale(1.01);
 }
 
-.task-item.done .task-text {
+/* ---------- Закрытая часть ---------- */
+.task-summary {
+  display: flex;
+  align-items: center;
+  padding: 4px 12px 4px 4px;
+  cursor: pointer;
+  user-select: none;
+  min-height: 48px;
+}
+
+.task-item.done .task-title {
   text-decoration: line-through;
   color: var(--text-done);
 }
 
+/* Полоска приоритета */
 .priority-badge {
   width: 4px;
   min-width: 4px;
   align-self: stretch;
   border-radius: 3px;
-  margin: 6px 8px 6px 6px;
+  margin: 8px 10px 8px 6px;
   cursor: pointer;
   transition: opacity 0.2s;
   flex-shrink: 0;
@@ -293,7 +309,7 @@ h1 {
   min-width: 0;
 }
 
-/* ===== Чекбокс ===== */
+/* Чекбокс */
 .task-checkbox {
   appearance: none;
   -webkit-appearance: none;
@@ -326,44 +342,161 @@ h1 {
   transform: rotate(45deg) translate(-1px, -1px);
 }
 
-.task-text {
+/* Заголовок */
+.task-title {
   flex: 1;
   font-size: 15px;
+  font-weight: 500;
   color: var(--text-primary);
-  word-break: break-word;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   min-width: 0;
   transition: color 0.2s;
 }
 
-.edit-btn, .save-btn, .delete-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
+/* Стрелка раскрытия */
+.task-arrow {
+  font-size: 12px;
+  color: var(--text-secondary);
   flex-shrink: 0;
-  padding: 4px 5px;
-  border-radius: 6px;
-  transition: color 0.18s, background-color 0.18s, transform 0.15s;
+  transition: transform 0.22s ease;
+  margin-left: 6px;
   line-height: 1;
 }
-.edit-btn   { font-size: 14px; color: var(--edit-color); }
-.edit-btn:hover   { color: var(--edit-hover); background: var(--bg-filter); }
-.save-btn   { font-size: 16px; color: var(--save-color); }
-.save-btn:hover   { color: var(--save-hover); background: var(--bg-filter); }
-.delete-btn { font-size: 18px; color: var(--delete-color); }
-.delete-btn:hover { color: var(--delete-hover); background: var(--bg-filter); transform: scale(1.15); }
 
-.edit-input {
+/* ---------- Раскрывающаяся часть ---------- */
+.task-details {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.28s ease, padding 0.28s ease;
+  padding: 0 14px 0 20px;
+  border-top: 0px solid var(--border);
+}
+
+.task-item.expanded .task-details {
+  max-height: 600px;
+  padding: 10px 14px 12px 20px;
+  border-top-width: 1px;
+}
+
+/* Описание */
+.task-desc {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.task-desc--empty {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.task-desc--empty::before { content: 'Описание не добавлено'; }
+
+/* Кнопки действий */
+.task-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-btn, .delete-btn {
   flex: 1;
-  font-size: 15px;
+  padding: 7px 12px;
+  font-size: 13px;
   font-family: inherit;
-  padding: 3px 8px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  transition: all 0.18s;
+  background: none;
+}
+
+.edit-btn {
+  color: var(--edit-hover);
+  border-color: var(--border);
+}
+.edit-btn:hover {
+  background-color: var(--bg-filter-hover);
+  border-color: var(--edit-hover);
+}
+
+.delete-btn {
+  color: var(--delete-color);
+  border-color: var(--border);
+}
+.delete-btn:hover {
+  background-color: var(--delete-color);
+  color: #fff;
+  border-color: var(--delete-color);
+}
+
+/* Форма редактирования */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 4px;
+}
+
+.edit-title-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-family: inherit;
   border: 1.5px solid var(--border-focus);
-  border-radius: 6px;
+  border-radius: 8px;
   outline: none;
   background-color: var(--bg-input);
   color: var(--text-primary);
-  min-width: 0;
 }
+
+.edit-desc-textarea {
+  width: 100%;
+  min-height: 64px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  border: 1.5px solid var(--border-focus);
+  border-radius: 8px;
+  outline: none;
+  resize: vertical;
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.edit-form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.save-btn, .cancel-btn {
+  flex: 1;
+  height: 36px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.18s;
+}
+
+.save-btn {
+  background-color: var(--save-color);
+  color: #fff;
+}
+.save-btn:hover   { background-color: var(--save-hover); }
+
+.cancel-btn {
+  background-color: var(--bg-filter);
+  color: var(--text-secondary);
+}
+.cancel-btn:hover { background-color: var(--bg-filter-hover); color: var(--text-primary); }
 
 /* ===== Нижняя панель ===== */
 .bottom-panel {
@@ -373,13 +506,11 @@ h1 {
   margin-top: 16px;
   min-height: 22px;
 }
-
 .counter {
   margin: 0;
   font-size: 13px;
   color: var(--text-counter);
 }
-
 .clear-done-btn {
   background: none;
   border: none;
@@ -397,8 +528,7 @@ h1 {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes task-disappear {
-  from { opacity: 1; transform: translateX(0); max-height: 60px; margin-bottom: 6px; }
+  from { opacity: 1; transform: translateX(0); max-height: 80px; margin-bottom: 6px; }
   to   { opacity: 0; transform: translateX(36px); max-height: 0; margin-bottom: 0; }
 }

@@ -1,16 +1,17 @@
-const taskInput    = document.getElementById('taskInput');
+const titleInput   = document.getElementById('titleInput');
+const titleCounter = document.getElementById('titleCounter');
+const descInput    = document.getElementById('descInput');
 const addBtn       = document.getElementById('addBtn');
 const taskList     = document.getElementById('taskList');
 const filterBtns   = document.querySelectorAll('.filter-btn');
 const counter      = document.getElementById('counter');
 const themeToggle  = document.getElementById('themeToggle');
 const clearDoneBtn = document.getElementById('clearDoneBtn');
-const charCounter  = document.getElementById('charCounter');
 const priorityTabs = document.querySelectorAll('.priority-tab');
 
-const MAX_LENGTH = 100;
+const TITLE_MAX = 60;
 let currentFilter   = 'all';
-let currentPriority = 'low'; // Дефолт — низкий
+let currentPriority = 'low';
 
 const PRIORITIES = {
   low:    { label: 'Низкий',  color: '#38a169' },
@@ -28,31 +29,29 @@ priorityTabs.forEach(function (tab) {
   });
 });
 
+// ========== Счётчик заголовка ==========
+
+titleInput.addEventListener('input', function () {
+  const len = titleInput.value.length;
+  titleCounter.textContent = len + ' / ' + TITLE_MAX;
+  if (len >= TITLE_MAX) {
+    titleCounter.classList.add('char-counter--limit');
+    titleCounter.classList.remove('char-counter--warning');
+  } else if (len >= TITLE_MAX * 0.8) {
+    titleCounter.classList.add('char-counter--warning');
+    titleCounter.classList.remove('char-counter--limit');
+  } else {
+    titleCounter.classList.remove('char-counter--warning', 'char-counter--limit');
+  }
+});
+
 // ========== Авторасширение textarea ==========
 
-function autoResize() {
-  taskInput.style.height = 'auto';
-  taskInput.style.height = taskInput.scrollHeight + 'px';
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
 }
-
-// ========== Счётчик символов ==========
-
-taskInput.addEventListener('input', function () {
-  const len = taskInput.value.length;
-  charCounter.textContent = len + ' / ' + MAX_LENGTH;
-
-  if (len >= MAX_LENGTH) {
-    charCounter.classList.add('char-counter--limit');
-    charCounter.classList.remove('char-counter--warning');
-  } else if (len >= MAX_LENGTH * 0.8) {
-    charCounter.classList.add('char-counter--warning');
-    charCounter.classList.remove('char-counter--limit');
-  } else {
-    charCounter.classList.remove('char-counter--warning', 'char-counter--limit');
-  }
-
-  autoResize();
-});
+descInput.addEventListener('input', function () { autoResize(descInput); });
 
 // ========== Тёмная тема ==========
 
@@ -60,16 +59,13 @@ function applyTheme(isDark) {
   if (isDark) {
     document.body.classList.add('dark');
     themeToggle.textContent = '☀️';
-    themeToggle.title = 'Светлая тема';
   } else {
     document.body.classList.remove('dark');
     themeToggle.textContent = '🌙';
-    themeToggle.title = 'Тёмная тема';
   }
 }
 
-const savedTheme = localStorage.getItem('theme');
-applyTheme(savedTheme === 'dark');
+applyTheme(localStorage.getItem('theme') === 'dark');
 
 themeToggle.addEventListener('click', function () {
   const isDark = document.body.classList.contains('dark');
@@ -85,13 +81,13 @@ function loadTasks() {
 }
 
 function saveTasks() {
-  const items = taskList.querySelectorAll('.task-item');
   const tasks = [];
-  items.forEach(function (li) {
+  taskList.querySelectorAll('.task-item').forEach(function (li) {
     tasks.push({
-      text:     li.querySelector('.task-text').textContent,
-      done:     li.classList.contains('done'),
-      priority: li.dataset.priority || 'low',
+      title:       li.dataset.title,
+      description: li.dataset.description,
+      done:        li.classList.contains('done'),
+      priority:    li.dataset.priority || 'low',
     });
   });
   localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -100,13 +96,13 @@ function saveTasks() {
 // ========== Счётчик задач ==========
 
 function updateCounter() {
-  const all      = taskList.querySelectorAll('.task-item');
+  const all       = taskList.querySelectorAll('.task-item');
   const doneItems = taskList.querySelectorAll('.task-item.done');
-  const activeCount = all.length - doneItems.length;
+  const active    = all.length - doneItems.length;
 
-  if (all.length === 0)       counter.textContent = '';
-  else if (activeCount === 0) counter.textContent = 'Все задачи выполнены! ✅';
-  else                        counter.textContent = 'Осталось: ' + activeCount;
+  if (all.length === 0)    counter.textContent = '';
+  else if (active === 0)   counter.textContent = 'Все задачи выполнены! ✅';
+  else                     counter.textContent = 'Осталось: ' + active;
 
   clearDoneBtn.style.display = doneItems.length > 0 ? 'block' : 'none';
 }
@@ -136,16 +132,12 @@ filterBtns.forEach(function (btn) {
 function removeTask(li) {
   li.classList.add('removing');
   li.addEventListener('animationend', function () {
-    li.remove();
-    saveTasks();
-    updateCounter();
+    li.remove(); saveTasks(); updateCounter();
   }, { once: true });
 }
 
-// ========== Очистка выполненных ==========
-
 clearDoneBtn.addEventListener('click', function () {
-  if (!confirm('Удалить все выполненные задачи?')) return;
+  if (!confirm('Удалить все выполненные?')) return;
   taskList.querySelectorAll('.task-item.done').forEach(function (li) {
     li.classList.add('removing');
     li.addEventListener('animationend', function () {
@@ -157,7 +149,6 @@ clearDoneBtn.addEventListener('click', function () {
 // ========== Drag and Drop ==========
 
 let draggedItem = null;
-let dragOverItem = null;
 
 function addDragListeners(li) {
   li.setAttribute('draggable', 'true');
@@ -169,18 +160,14 @@ function addDragListeners(li) {
 
   li.addEventListener('dragend', function () {
     li.classList.remove('dragging');
-    taskList.querySelectorAll('.task-item').forEach(function (item) {
-      item.classList.remove('drag-over');
-    });
+    taskList.querySelectorAll('.task-item').forEach(function (i) { i.classList.remove('drag-over'); });
     draggedItem = null;
-    dragOverItem = null;
   });
 
   li.addEventListener('dragover', function (e) {
     e.preventDefault();
     if (li === draggedItem) return;
-    if (dragOverItem) dragOverItem.classList.remove('drag-over');
-    dragOverItem = li;
+    taskList.querySelectorAll('.task-item').forEach(function (i) { i.classList.remove('drag-over'); });
     li.classList.add('drag-over');
   });
 
@@ -197,24 +184,33 @@ function addDragListeners(li) {
 
 let taskIdCounter = 0;
 
-function createTaskElement(text, done, animate, priority) {
+function createTaskElement(title, description, done, animate, priority) {
   const p = PRIORITIES[priority] ? priority : 'low';
 
   const li = document.createElement('li');
   li.classList.add('task-item');
-  li.dataset.priority = p;
-  if (done) li.classList.add('done');
+  li.dataset.priority    = p;
+  li.dataset.title       = title;
+  li.dataset.description = description || '';
+  if (done)    li.classList.add('done');
   if (animate) li.classList.add('task-item--animated');
 
   addDragListeners(li);
 
-  // Цветовая полоска приоритета
+  // ---------- Закрытая часть (всегда видно) ----------
+
+  const summary = document.createElement('div');
+  summary.classList.add('task-summary');
+
+  // Полоска приоритета
   const badge = document.createElement('span');
   badge.classList.add('priority-badge');
-  badge.title = 'Приоритет: ' + PRIORITIES[p].label + '. Нажмите, чтобы сменить';
   badge.style.backgroundColor = PRIORITIES[p].color;
+  badge.title = 'Приоритет: ' + PRIORITIES[p].label + '. Нажмите, чтобы сменить';
 
-  badge.addEventListener('click', function () {
+  // Клик по полоске — меняет приоритет
+  badge.addEventListener('click', function (e) {
+    e.stopPropagation();
     const order = ['low', 'medium', 'high'];
     const next = order[(order.indexOf(li.dataset.priority) + 1) % order.length];
     li.dataset.priority = next;
@@ -223,8 +219,6 @@ function createTaskElement(text, done, animate, priority) {
     saveTasks();
   });
 
-  li.appendChild(badge);
-
   const checkboxId = 'task-' + taskIdCounter++;
 
   const checkbox = document.createElement('input');
@@ -232,108 +226,170 @@ function createTaskElement(text, done, animate, priority) {
   checkbox.classList.add('task-checkbox');
   checkbox.checked = done;
   checkbox.id = checkboxId;
-
+  checkbox.addEventListener('click', function (e) { e.stopPropagation(); });
   checkbox.addEventListener('change', function () {
     li.classList.toggle('done', checkbox.checked);
-    saveTasks();
-    applyFilter();
-    updateCounter();
+    saveTasks(); applyFilter(); updateCounter();
   });
 
-  const span = document.createElement('span');
-  span.classList.add('task-text');
-  span.textContent = text;
+  // Заголовок задачи
+  const titleSpan = document.createElement('span');
+  titleSpan.classList.add('task-title');
+  titleSpan.textContent = title;
+
+  // Стрелка раскрытия
+  const arrow = document.createElement('span');
+  arrow.classList.add('task-arrow');
+  arrow.textContent = '❯';
 
   const label = document.createElement('label');
   label.htmlFor = checkboxId;
   label.classList.add('task-label');
   label.appendChild(checkbox);
-  label.appendChild(span);
+  label.appendChild(titleSpan);
+  label.addEventListener('click', function (e) { e.stopPropagation(); });
 
-  // Редактирование
+  summary.appendChild(badge);
+  summary.appendChild(label);
+  summary.appendChild(arrow);
+
+  // ---------- Раскрывающаяся часть ----------
+
+  const details = document.createElement('div');
+  details.classList.add('task-details');
+
+  // Текст описания
+  const descSpan = document.createElement('p');
+  descSpan.classList.add('task-desc');
+  descSpan.textContent = description || '';
+  if (!description) descSpan.classList.add('task-desc--empty');
+
+  // Блок кнопок
+  const actions = document.createElement('div');
+  actions.classList.add('task-actions');
+
   const editBtn = document.createElement('button');
   editBtn.classList.add('edit-btn');
-  editBtn.textContent = '✏️';
-  editBtn.title = 'Редактировать';
-
-  editBtn.addEventListener('click', function () {
-    const currentText = span.textContent;
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.classList.add('edit-input');
-    input.value = currentText;
-    input.maxLength = MAX_LENGTH;
-
-    span.style.display = 'none';
-    label.insertBefore(input, span);
-    input.focus();
-    input.select();
-    editBtn.style.display = 'none';
-
-    const saveBtn = document.createElement('button');
-    saveBtn.classList.add('save-btn');
-    saveBtn.textContent = '✅';
-    saveBtn.title = 'Сохранить';
-
-    function saveEdit() {
-      const newText = input.value.trim();
-      if (!newText) { alert('Текст не может быть пустым!'); input.focus(); return; }
-      span.textContent = newText;
-      span.style.display = '';
-      input.remove();
-      saveBtn.remove();
-      editBtn.style.display = '';
-      saveTasks();
-    }
-
-    saveBtn.addEventListener('click', saveEdit);
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') saveEdit();
-      if (e.key === 'Escape') {
-        span.style.display = '';
-        input.remove();
-        saveBtn.remove();
-        editBtn.style.display = '';
-      }
-    });
-
-    li.insertBefore(saveBtn, deleteBtn);
-  });
+  editBtn.textContent = '✏️ Редактировать';
 
   const deleteBtn = document.createElement('button');
   deleteBtn.classList.add('delete-btn');
-  deleteBtn.textContent = '×';
-  deleteBtn.addEventListener('click', function () { removeTask(li); });
+  deleteBtn.textContent = '× Удалить';
+  deleteBtn.addEventListener('click', function (e) { e.stopPropagation(); removeTask(li); });
 
-  li.appendChild(label);
-  li.appendChild(editBtn);
-  li.appendChild(deleteBtn);
+  // Редактирование
+  editBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+
+    // Создаём форму редактирования
+    const editForm = document.createElement('div');
+    editForm.classList.add('edit-form');
+
+    const editTitleInput = document.createElement('input');
+    editTitleInput.type = 'text';
+    editTitleInput.classList.add('edit-title-input');
+    editTitleInput.value = li.dataset.title;
+    editTitleInput.maxLength = TITLE_MAX;
+    editTitleInput.placeholder = 'Заголовок';
+
+    const editDescTextarea = document.createElement('textarea');
+    editDescTextarea.classList.add('edit-desc-textarea');
+    editDescTextarea.value = li.dataset.description;
+    editDescTextarea.placeholder = 'Описание';
+    editDescTextarea.rows = 3;
+
+    const editActions = document.createElement('div');
+    editActions.classList.add('edit-form-actions');
+
+    const saveBtn = document.createElement('button');
+    saveBtn.classList.add('save-btn');
+    saveBtn.textContent = 'Сохранить';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.classList.add('cancel-btn');
+    cancelBtn.textContent = 'Отмена';
+
+    function closeEdit() {
+      editForm.remove();
+      actions.style.display = '';
+    }
+
+    saveBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const newTitle = editTitleInput.value.trim();
+      if (!newTitle) { alert('Заголовок не может быть пустым!'); return; }
+      const newDesc = editDescTextarea.value.trim();
+
+      li.dataset.title = newTitle;
+      li.dataset.description = newDesc;
+      titleSpan.textContent = newTitle;
+      descSpan.textContent = newDesc;
+      if (!newDesc) descSpan.classList.add('task-desc--empty');
+      else          descSpan.classList.remove('task-desc--empty');
+
+      saveTasks();
+      closeEdit();
+    });
+
+    cancelBtn.addEventListener('click', function (e) { e.stopPropagation(); closeEdit(); });
+
+    editActions.appendChild(saveBtn);
+    editActions.appendChild(cancelBtn);
+    editForm.appendChild(editTitleInput);
+    editForm.appendChild(editDescTextarea);
+    editForm.appendChild(editActions);
+
+    actions.style.display = 'none';
+    details.appendChild(editForm);
+    editTitleInput.focus();
+  });
+
+  actions.appendChild(editBtn);
+  actions.appendChild(deleteBtn);
+
+  details.appendChild(descSpan);
+  details.appendChild(actions);
+
+  li.appendChild(summary);
+  li.appendChild(details);
+
+  // ---------- Раскрытие / закрытие по клику на summary ----------
+
+  summary.addEventListener('click', function () {
+    const isOpen = li.classList.toggle('expanded');
+    arrow.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(0deg)';
+  });
+
   return li;
 }
 
 // ========== Добавление задачи ==========
 
 function addTask() {
-  const text = taskInput.value.trim();
-  if (!text) { alert('Введите текст задачи!'); return; }
+  const title = titleInput.value.trim();
+  if (!title) { alert('Введите заголовок задачи!'); titleInput.focus(); return; }
 
-  const li = createTaskElement(text, false, true, currentPriority);
+  const desc = descInput.value.trim();
+  const li = createTaskElement(title, desc, false, true, currentPriority);
   taskList.appendChild(li);
-  saveTasks();
-  applyFilter();
-  updateCounter();
+  saveTasks(); applyFilter(); updateCounter();
 
-  taskInput.value = '';
-  autoResize();
-  charCounter.textContent = '0 / ' + MAX_LENGTH;
-  charCounter.classList.remove('char-counter--warning', 'char-counter--limit');
-  taskInput.focus();
+  titleInput.value = '';
+  titleCounter.textContent = '0 / ' + TITLE_MAX;
+  titleCounter.classList.remove('char-counter--warning', 'char-counter--limit');
+  descInput.value = '';
+  descInput.style.height = '';
+  titleInput.focus();
 }
 
 // ========== Загрузка ==========
 
 loadTasks().forEach(function (task) {
-  taskList.appendChild(createTaskElement(task.text, task.done, false, task.priority));
+  // Обратная совместимость: если задача сохранена со старым форматом (только text),
+  // используем его как заголовок
+  const title = task.title || task.text || 'Без названия';
+  const desc  = task.description || '';
+  taskList.appendChild(createTaskElement(title, desc, task.done, false, task.priority));
 });
 
 applyFilter();
@@ -341,6 +397,10 @@ updateCounter();
 
 addBtn.addEventListener('click', addTask);
 
-taskInput.addEventListener('keydown', function (e) {
+titleInput.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') { e.preventDefault(); descInput.focus(); }
+});
+
+descInput.addEventListener('keydown', function (e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addTask(); }
 });

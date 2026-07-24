@@ -14,26 +14,33 @@
 
       <div class="input-area">
 
-        <!-- Три таба приоритета -->
+        <!-- Табы приоритета -->
         <div class="priority-tabs">
           <button class="priority-tab active" data-priority="low">Низкий</button>
           <button class="priority-tab" data-priority="medium">Средний</button>
           <button class="priority-tab" data-priority="high">Высокий</button>
         </div>
 
-        <!-- Обёртка: textarea + счётчик внутри -->
-        <div class="textarea-wrapper">
-          <textarea
-            id="taskInput"
-            class="task-textarea"
-            placeholder="Введите задачу..."
-            maxlength="100"
-            rows="3"
-          ></textarea>
-          <span id="charCounter" class="char-counter">0 / 100</span>
+        <!-- Заголовок -->
+        <div class="field-wrapper">
+          <input
+            type="text"
+            id="titleInput"
+            class="title-input"
+            placeholder="Заголовок задачи..."
+            maxlength="60"
+          />
+          <span id="titleCounter" class="char-counter">0 / 60</span>
         </div>
 
-        <!-- Кнопка на всю ширину -->
+        <!-- Описание -->
+        <textarea
+          id="descInput"
+          class="desc-textarea"
+          placeholder="Описание (необязательно)..."
+          rows="3"
+        ></textarea>
+
         <button id="addBtn" class="add-btn">Добавить</button>
 
       </div>
