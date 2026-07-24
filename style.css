@@ -35,7 +35,7 @@
   --select-border:  #cccccc;
 }
 
-/* ===== CSS-переменные: тёмная тема ===== */
+/* ===== Тёмная тема ===== */
 body.dark {
   --bg-page:        #1a1a2e;
   --bg-container:   #16213e;
@@ -74,9 +74,6 @@ body.dark {
 
 body {
   transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-body {
   font-family: Arial, sans-serif;
   background-color: var(--bg-page);
   display: flex;
@@ -124,48 +121,32 @@ h1 {
   transform: scale(1.1);
 }
 
-/* ===== Блок ввода =====
-   Макет: [select] [textarea] [кнопка]
-   Все элементы выровнены по верхнему краю (flex-start),
-   чтобы при расширении textarea она растёт вниз, а не тянет селект и кнопку.
-===== */
+/* ==============================================
+   БЛОК ВВОДА
+   Макет:
+   [ .input-wrapper (flex:1) ] [ .input-actions ]
+   .input-wrapper: textarea + счётчик
+   .input-actions: [Кнопка] сверху + [Селект] снизу
+============================================== */
 .input-area {
   display: flex;
   gap: 8px;
-  align-items: flex-start;
+  align-items: stretch;   /* оба колонки одинаковой высоты */
   margin-bottom: 16px;
 }
 
-/* textarea занимает всё свободное пространство, счётчик под ним */
+/* Левая колонка: textarea + счётчик */
 .input-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 0; /* предотвращаем выход за границы flex-контейнера */
+  min-width: 0;
 }
 
-/* ===== Селект приоритета ===== */
-.priority-select {
-  flex-shrink: 0;            /* не сжимается */
-  font-size: 13px;
-  padding: 0 8px;
-  height: 44px;              /* та же высота, что у textarea и кнопки */
-  border: 2px solid var(--select-border);
-  border-radius: 8px;
-  background-color: var(--select-bg);
-  color: var(--text-primary);
-  cursor: pointer;
-  outline: none;
-  transition: border-color 0.2s, background-color 0.3s, color 0.3s;
-}
-
-.priority-select:focus {
-  border-color: var(--accent);
-}
-
-/* ===== textarea ===== */
+/* textarea растягивается на всю доступную высоту колонки */
 .task-textarea {
+  flex: 1;               /* занять всю высоту колонки, кроме счётчика */
   width: 100%;
   box-sizing: border-box;
   padding: 10px 14px;
@@ -191,12 +172,34 @@ h1 {
   border-color: var(--accent);
 }
 
-/* ===== Кнопка Добавить ===== */
-.input-area button {
+/* Счётчик символов */
+.char-counter {
+  font-size: 12px;
+  color: var(--text-counter);
+  text-align: right;
+  transition: color 0.2s;
   flex-shrink: 0;
-  padding: 0 18px;
-  height: 44px;              /* та же высота, что у select */
-  font-size: 16px;
+}
+
+.char-counter--warning { color: #e67e22; }
+.char-counter--limit   { color: var(--delete-color); font-weight: bold; }
+
+/* ==============================================
+   Правая колонка: кнопка сверху, селект снизу
+   Оба элемента одинаковой ширины (width: 100%)
+============================================== */
+.input-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 100px;          /* фиксированная ширина правой колонки */
+}
+
+.input-actions button {
+  width: 100%;
+  flex: 1;               /* кнопка занимает ~половину высоты */
+  font-size: 15px;
   background-color: var(--accent);
   color: white;
   border: none;
@@ -206,25 +209,28 @@ h1 {
   white-space: nowrap;
 }
 
-.input-area button:hover {
+.input-actions button:hover {
   background-color: var(--accent-hover);
 }
 
-/* ===== Счётчик символов ===== */
-.char-counter {
-  font-size: 12px;
-  color: var(--text-counter);
-  text-align: right;
-  transition: color 0.2s;
+/* ===== Селект приоритета ===== */
+.priority-select {
+  width: 100%;
+  flex-shrink: 0;
+  font-size: 13px;
+  padding: 0 6px;
+  height: 36px;
+  border: 2px solid var(--select-border);
+  border-radius: 8px;
+  background-color: var(--select-bg);
+  color: var(--text-primary);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.3s, color 0.3s;
 }
 
-.char-counter--warning {
-  color: #e67e22;
-}
-
-.char-counter--limit {
-  color: var(--delete-color);
-  font-weight: bold;
+.priority-select:focus {
+  border-color: var(--accent);
 }
 
 /* ===== Фильтры ===== */
@@ -246,15 +252,8 @@ h1 {
   transition: all 0.2s;
 }
 
-.filter-btn:hover {
-  background-color: var(--bg-filter-hover);
-}
-
-.filter-btn.active {
-  background-color: var(--accent);
-  color: white;
-  border-color: var(--accent);
-}
+.filter-btn:hover  { background-color: var(--bg-filter-hover); }
+.filter-btn.active { background-color: var(--accent); color: white; border-color: var(--accent); }
 
 /* ===== Список задач ===== */
 #taskList {
@@ -263,7 +262,6 @@ h1 {
   margin: 0;
 }
 
-/* ===== Один элемент задачи ===== */
 .task-item {
   display: flex;
   align-items: center;
@@ -276,18 +274,15 @@ h1 {
   cursor: grab;
 }
 
-.task-item.hidden { display: none; }
-.task-item--animated { animation: task-appear 0.3s ease; }
-.task-item.dragging { opacity: 0.4; cursor: grabbing; }
+.task-item.hidden          { display: none; }
+.task-item--animated       { animation: task-appear 0.3s ease; }
+.task-item.dragging        { opacity: 0.4; cursor: grabbing; }
+.task-item.removing        { animation: task-disappear 0.3s ease forwards; }
 
 .task-item.drag-over {
   border-color: var(--accent);
   background-color: var(--bg-filter);
   transform: scale(1.01);
-}
-
-.task-item.removing {
-  animation: task-disappear 0.3s ease forwards;
 }
 
 .task-item.done .task-text {
@@ -308,14 +303,8 @@ h1 {
   flex-shrink: 0;
 }
 
-.priority-badge:hover {
-  opacity: 0.75;
-  transform: scaleY(1.05);
-}
-
-.task-item.done .priority-badge {
-  opacity: 0.3;
-}
+.priority-badge:hover { opacity: 0.75; transform: scaleY(1.05); }
+.task-item.done .priority-badge { opacity: 0.3; }
 
 .task-label {
   display: flex;
@@ -376,10 +365,7 @@ h1 {
   padding: 4px 6px;
 }
 
-.delete-btn:hover {
-  color: var(--delete-hover);
-  transform: scale(1.2);
-}
+.delete-btn:hover { color: var(--delete-hover); transform: scale(1.2); }
 
 .edit-btn {
   background: none;
@@ -391,13 +377,9 @@ h1 {
   transition: color 0.2s, transform 0.2s;
   flex-shrink: 0;
   padding: 4px 6px;
-  opacity: 1;
 }
 
-.edit-btn:hover {
-  color: var(--edit-hover);
-  transform: scale(1.2);
-}
+.edit-btn:hover { color: var(--edit-hover); transform: scale(1.2); }
 
 .save-btn {
   background: none;
@@ -411,10 +393,7 @@ h1 {
   padding: 4px 6px;
 }
 
-.save-btn:hover {
-  color: var(--save-hover);
-  transform: scale(1.2);
-}
+.save-btn:hover { color: var(--save-hover); transform: scale(1.2); }
 
 .edit-input {
   flex: 1;
@@ -465,16 +444,6 @@ h1 {
 }
 
 @keyframes task-disappear {
-  from {
-    opacity: 1;
-    transform: translateX(0);
-    max-height: 60px;
-    margin-bottom: 8px;
-  }
-  to {
-    opacity: 0;
-    transform: translateX(40px);
-    max-height: 0;
-    margin-bottom: 0;
-  }
+  from { opacity: 1; transform: translateX(0); max-height: 60px; margin-bottom: 8px; }
+  to   { opacity: 0; transform: translateX(40px); max-height: 0; margin-bottom: 0; }
 }
