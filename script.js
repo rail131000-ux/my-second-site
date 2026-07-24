@@ -10,13 +10,20 @@ const charCounter = document.getElementById('charCounter');
 const MAX_LENGTH = 100;
 let currentFilter = 'all';
 
+// ========== Авторасширение textarea ==========
+
+function autoResize() {
+  // Сбрасываем высоту до auto, чтобы scrollHeight был пересчитан
+  taskInput.style.height = 'auto';
+  taskInput.style.height = taskInput.scrollHeight + 'px';
+}
+
 // ========== Счётчик символов ==========
 
 taskInput.addEventListener('input', function () {
   const len = taskInput.value.length;
   charCounter.textContent = len + ' / ' + MAX_LENGTH;
 
-  // Меняем цвет когда осталось мало символов
   if (len >= MAX_LENGTH) {
     charCounter.classList.add('char-counter--limit');
     charCounter.classList.remove('char-counter--warning');
@@ -26,6 +33,8 @@ taskInput.addEventListener('input', function () {
   } else {
     charCounter.classList.remove('char-counter--warning', 'char-counter--limit');
   }
+
+  autoResize();
 });
 
 // ========== Тёмная тема ==========
@@ -131,7 +140,6 @@ clearDoneBtn.addEventListener('click', function () {
   if (!confirmed) return;
 
   const doneItems = taskList.querySelectorAll('.task-item.done');
-
   doneItems.forEach(function (li) {
     li.classList.add('removing');
     li.addEventListener('animationend', function () {
@@ -152,9 +160,7 @@ function addDragListeners(li) {
 
   li.addEventListener('dragstart', function () {
     draggedItem = li;
-    setTimeout(function () {
-      li.classList.add('dragging');
-    }, 0);
+    setTimeout(function () { li.classList.add('dragging'); }, 0);
   });
 
   li.addEventListener('dragend', function () {
@@ -196,10 +202,7 @@ function createTaskElement(text, done, animate) {
   const li = document.createElement('li');
   li.classList.add('task-item');
   if (done) li.classList.add('done');
-
-  if (animate) {
-    li.classList.add('task-item--animated');
-  }
+  if (animate) li.classList.add('task-item--animated');
 
   addDragListeners(li);
 
@@ -248,7 +251,6 @@ function createTaskElement(text, done, animate) {
     label.insertBefore(input, span);
     input.focus();
     input.select();
-
     editBtn.style.display = 'none';
 
     const saveBtn = document.createElement('button');
@@ -272,7 +274,6 @@ function createTaskElement(text, done, animate) {
     }
 
     saveBtn.addEventListener('click', saveEdit);
-
     input.addEventListener('keydown', function (event) {
       if (event.key === 'Enter') saveEdit();
       if (event.key === 'Escape') {
@@ -291,9 +292,7 @@ function createTaskElement(text, done, animate) {
   const deleteBtn = document.createElement('button');
   deleteBtn.classList.add('delete-btn');
   deleteBtn.textContent = '×';
-  deleteBtn.addEventListener('click', function () {
-    removeTask(li);
-  });
+  deleteBtn.addEventListener('click', function () { removeTask(li); });
 
   li.appendChild(label);
   li.appendChild(editBtn);
@@ -317,7 +316,8 @@ function addTask() {
   updateCounter();
 
   taskInput.value = '';
-  // Сбрасываем счётчик символов после добавления задачи
+  // Сбрасываем высоту и счётчик после добавления
+  autoResize();
   charCounter.textContent = '0 / ' + MAX_LENGTH;
   charCounter.classList.remove('char-counter--warning', 'char-counter--limit');
   taskInput.focus();
@@ -337,6 +337,10 @@ updateCounter();
 
 addBtn.addEventListener('click', addTask);
 
+// Enter — добавляет задачу, Shift+Enter — перенос строки (но ограничен maxlength не даст)
 taskInput.addEventListener('keydown', function (event) {
-  if (event.key === 'Enter') addTask();
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
+    addTask();
+  }
 });
