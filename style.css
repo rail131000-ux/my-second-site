@@ -30,10 +30,9 @@
   --toggle-bg:       #e2e8f0;
   --toggle-color:    #555;
 
-  /* Цвета табов приоритета */
-  --tab-low-color:    #38a169;
-  --tab-med-color:    #d69e2e;
-  --tab-high-color:   #e53e3e;
+  --tab-low-color:   #38a169;
+  --tab-med-color:   #d69e2e;
+  --tab-high-color:  #e53e3e;
 }
 
 /* ===== Тёмная тема ===== */
@@ -119,13 +118,7 @@ h1 {
 }
 .theme-toggle:hover { transform: scale(1.12); }
 
-/* ==============================================
-   БЛОК ВВОДА
-   Структура:
-   1. Три таба (на всю ширину)
-   2. textarea (растёт вниз)
-   3. Строка: счётчик слева + кнопка справа
-============================================== */
+/* ===== Блок ввода ===== */
 .input-area {
   display: flex;
   flex-direction: column;
@@ -153,34 +146,25 @@ h1 {
   transition: all 0.18s;
   white-space: nowrap;
 }
-
 .priority-tab:hover {
   background-color: var(--bg-filter-hover);
   color: var(--text-primary);
 }
+.priority-tab[data-priority="low"].active    { background-color: var(--tab-low-color);  border-color: var(--tab-low-color);  color: #fff; }
+.priority-tab[data-priority="medium"].active  { background-color: var(--tab-med-color);  border-color: var(--tab-med-color);  color: #fff; }
+.priority-tab[data-priority="high"].active    { background-color: var(--tab-high-color); border-color: var(--tab-high-color); color: #fff; }
 
-/* Активный таб меняет цвет под приоритет */
-.priority-tab[data-priority="low"].active {
-  background-color: var(--tab-low-color);
-  border-color: var(--tab-low-color);
-  color: #fff;
-}
-.priority-tab[data-priority="medium"].active {
-  background-color: var(--tab-med-color);
-  border-color: var(--tab-med-color);
-  color: #fff;
-}
-.priority-tab[data-priority="high"].active {
-  background-color: var(--tab-high-color);
-  border-color: var(--tab-high-color);
-  color: #fff;
+/* ===== Обёртка textarea + счётчик ===== */
+.textarea-wrapper {
+  position: relative;   /* нужно, чтобы счётчик позиционировался внутри */
+  width: 100%;
 }
 
-/* ===== textarea ===== */
 .task-textarea {
   width: 100%;
+  /* нижний паддинг увеличен, чтобы текст не перекрывал счётчик */
   min-height: 80px;
-  padding: 11px 14px;
+  padding: 11px 14px 28px 14px;
   font-size: 15px;
   font-family: inherit;
   border: 1.5px solid var(--border);
@@ -196,27 +180,23 @@ h1 {
 .task-textarea::placeholder { color: var(--text-secondary); }
 .task-textarea:focus         { border-color: var(--border-focus); }
 
-/* ===== Нижняя строка: счётчик + кнопка ===== */
-.input-bottom-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
+/* Счётчик внутри поля */
 .char-counter {
-  font-size: 12px;
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  font-size: 11px;
   color: var(--text-counter);
-  flex-shrink: 0;
+  pointer-events: none;   /* не мешает кликам по textarea */
   transition: color 0.2s;
 }
 .char-counter--warning { color: #dd8800; }
 .char-counter--limit   { color: var(--delete-color); font-weight: 600; }
 
+/* Кнопка на всю ширину */
 .add-btn {
-  flex-shrink: 0;
-  height: 40px;
-  padding: 0 24px;
+  width: 100%;
+  height: 42px;
   font-size: 15px;
   font-family: inherit;
   font-weight: 600;
@@ -228,7 +208,7 @@ h1 {
   transition: background-color 0.2s, transform 0.1s;
 }
 .add-btn:hover  { background-color: var(--accent-hover); }
-.add-btn:active { transform: scale(0.97); }
+.add-btn:active { transform: scale(0.98); }
 
 /* ===== Фильтры ===== */
 .filters {
@@ -290,7 +270,6 @@ h1 {
   color: var(--text-done);
 }
 
-/* Цветовая полоска приоритета */
 .priority-badge {
   width: 4px;
   min-width: 4px;
@@ -298,13 +277,12 @@ h1 {
   border-radius: 3px;
   margin: 6px 8px 6px 6px;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s;
+  transition: opacity 0.2s;
   flex-shrink: 0;
 }
-.priority-badge:hover         { opacity: 0.7; }
+.priority-badge:hover           { opacity: 0.7; }
 .task-item.done .priority-badge { opacity: 0.25; }
 
-/* Лейбл */
 .task-label {
   display: flex;
   align-items: center;
@@ -315,7 +293,7 @@ h1 {
   min-width: 0;
 }
 
-/* ===== Чекбокс — галочка точно по центру ===== */
+/* ===== Чекбокс ===== */
 .task-checkbox {
   appearance: none;
   -webkit-appearance: none;
@@ -329,18 +307,14 @@ h1 {
   position: relative;
   background-color: transparent;
   flex-shrink: 0;
-  /* Центрируем всё содержимое чекбокса */
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
 .task-checkbox:checked {
   background-color: var(--accent);
   border-color: var(--accent);
 }
-
-/* Галочка через ::after с перецентровкой */
 .task-checkbox:checked::after {
   content: '';
   display: block;
@@ -371,13 +345,10 @@ h1 {
   transition: color 0.18s, background-color 0.18s, transform 0.15s;
   line-height: 1;
 }
-
 .edit-btn   { font-size: 14px; color: var(--edit-color); }
 .edit-btn:hover   { color: var(--edit-hover); background: var(--bg-filter); }
-
 .save-btn   { font-size: 16px; color: var(--save-color); }
 .save-btn:hover   { color: var(--save-hover); background: var(--bg-filter); }
-
 .delete-btn { font-size: 18px; color: var(--delete-color); }
 .delete-btn:hover { color: var(--delete-hover); background: var(--bg-filter); transform: scale(1.15); }
 

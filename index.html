@@ -21,20 +21,20 @@
           <button class="priority-tab" data-priority="high">🔴 Высокий</button>
         </div>
 
-        <!-- Поле ввода -->
-        <textarea
-          id="taskInput"
-          class="task-textarea"
-          placeholder="Введите задачу..."
-          maxlength="100"
-          rows="3"
-        ></textarea>
-
-        <!-- Нижняя строка: счётчик + кнопка -->
-        <div class="input-bottom-row">
+        <!-- Обёртка: textarea + счётчик внутри -->
+        <div class="textarea-wrapper">
+          <textarea
+            id="taskInput"
+            class="task-textarea"
+            placeholder="Введите задачу..."
+            maxlength="100"
+            rows="3"
+          ></textarea>
           <span id="charCounter" class="char-counter">0 / 100</span>
-          <button id="addBtn" class="add-btn">Добавить</button>
         </div>
+
+        <!-- Кнопка на всю ширину -->
+        <button id="addBtn" class="add-btn">Добавить</button>
 
       </div>
 
