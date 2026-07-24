@@ -8,14 +8,19 @@
   </head>
   <body>
     <div class="container">
-      <!-- Кнопка переключения темы -->
       <button id="themeToggle" class="theme-toggle" title="Переключить тему">🌙</button>
 
       <h1>Мой список задач</h1>
 
-      <!-- Форма для добавления задачи -->
       <div class="input-area">
         <div class="input-wrapper">
+          <div class="input-top-row">
+            <select id="prioritySelect" class="priority-select" title="Приоритет задачи">
+              <option value="low">🟢 Низкий</option>
+              <option value="medium" selected>🟡 Средний</option>
+              <option value="high">🔴 Высокий</option>
+            </select>
+          </div>
           <textarea
             id="taskInput"
             class="task-textarea"
@@ -28,17 +33,14 @@
         <button id="addBtn">Добавить</button>
       </div>
 
-      <!-- Кнопки фильтра -->
       <div class="filters">
         <button class="filter-btn active" data-filter="all">Все</button>
         <button class="filter-btn" data-filter="active">Активные</button>
         <button class="filter-btn" data-filter="done">Выполненные</button>
       </div>
 
-      <!-- Список задач -->
       <ul id="taskList"></ul>
 
-      <!-- Нижняя панель: счётчик и кнопка очистки -->
       <div class="bottom-panel">
         <p id="counter" class="counter"></p>
         <button id="clearDoneBtn" class="clear-done-btn" style="display:none">Очистить выполненные</button>

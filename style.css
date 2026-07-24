@@ -1,4 +1,4 @@
-/* ===== CSS-переменные: светлая тема (по умолчанию) ===== */
+/* ===== CSS-переменные: светлая тема ===== */
 :root {
   --bg-page:        #f0f4f8;
   --bg-container:   #ffffff;
@@ -30,6 +30,9 @@
 
   --toggle-bg:      #e2e8f0;
   --toggle-color:   #333333;
+
+  --select-bg:      #f0f4f8;
+  --select-border:  #cccccc;
 }
 
 /* ===== CSS-переменные: тёмная тема ===== */
@@ -64,14 +67,15 @@ body.dark {
 
   --toggle-bg:      #2d3748;
   --toggle-color:   #e2e8f0;
+
+  --select-bg:      #0f3460;
+  --select-border:  #4a5568;
 }
 
-/* ===== Переход анимации при смене темы ===== */
 body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* ===== Общие стили страницы ===== */
 body {
   font-family: Arial, sans-serif;
   background-color: var(--bg-page);
@@ -81,7 +85,6 @@ body {
   margin: 0;
 }
 
-/* ===== Центральный блок ===== */
 .container {
   background-color: var(--bg-container);
   border-radius: 12px;
@@ -98,7 +101,6 @@ h1 {
   margin-bottom: 24px;
 }
 
-/* ===== Кнопка переключения темы ===== */
 .theme-toggle {
   position: absolute;
   top: 16px;
@@ -130,7 +132,6 @@ h1 {
   align-items: flex-start;
 }
 
-/* ===== Обёртка поля ввода ===== */
 .input-wrapper {
   flex: 1;
   display: flex;
@@ -138,7 +139,30 @@ h1 {
   gap: 4px;
 }
 
-/* ===== textarea вместо input ===== */
+/* ===== Строка с селектом приоритета ===== */
+.input-top-row {
+  display: flex;
+  align-items: center;
+}
+
+/* ===== Селект приоритета ===== */
+.priority-select {
+  font-size: 13px;
+  padding: 4px 8px;
+  border: 2px solid var(--select-border);
+  border-radius: 6px;
+  background-color: var(--select-bg);
+  color: var(--text-primary);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.3s, color 0.3s;
+}
+
+.priority-select:focus {
+  border-color: var(--accent);
+}
+
+/* ===== textarea ===== */
 .task-textarea {
   width: 100%;
   box-sizing: border-box;
@@ -148,10 +172,10 @@ h1 {
   border: 2px solid var(--border-input);
   border-radius: 8px;
   outline: none;
-  resize: none;              /* убираем ручку изменения размера */
-  overflow: hidden;          /* прячем полосу прокрутки — высота растёт сама */
+  resize: none;
+  overflow: hidden;
   line-height: 1.5;
-  min-height: 44px;          /* стартовая высота — как у старого input */
+  min-height: 44px;
   transition: border-color 0.2s, background-color 0.3s, color 0.3s;
   background-color: var(--bg-input);
   color: var(--text-primary);
@@ -198,7 +222,7 @@ h1 {
   font-weight: bold;
 }
 
-/* ===== Блок с кнопками фильтра ===== */
+/* ===== Фильтры ===== */
 .filters {
   display: flex;
   gap: 8px;
@@ -247,18 +271,9 @@ h1 {
   cursor: grab;
 }
 
-.task-item.hidden {
-  display: none;
-}
-
-.task-item--animated {
-  animation: task-appear 0.3s ease;
-}
-
-.task-item.dragging {
-  opacity: 0.4;
-  cursor: grabbing;
-}
+.task-item.hidden { display: none; }
+.task-item--animated { animation: task-appear 0.3s ease; }
+.task-item.dragging { opacity: 0.4; cursor: grabbing; }
 
 .task-item.drag-over {
   border-color: var(--accent);
@@ -273,6 +288,29 @@ h1 {
 .task-item.done .task-text {
   text-decoration: line-through;
   color: var(--text-done);
+}
+
+/* ===== Цветовая метка приоритета ===== */
+.priority-badge {
+  width: 10px;
+  min-width: 10px;
+  height: 36px;
+  border-radius: 4px;
+  margin-left: 6px;
+  margin-right: 2px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+
+.priority-badge:hover {
+  opacity: 0.75;
+  transform: scaleY(1.05);
+}
+
+/* Выполненная задача: полупрозрачная метка */
+.task-item.done .priority-badge {
+  opacity: 0.3;
 }
 
 .task-label {
