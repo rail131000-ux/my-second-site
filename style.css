@@ -124,33 +124,35 @@ h1 {
   transform: scale(1.1);
 }
 
-/* ===== Поле ввода и кнопка ===== */
+/* ===== Блок ввода =====
+   Макет: [select] [textarea] [кнопка]
+   Все элементы выровнены по верхнему краю (flex-start),
+   чтобы при расширении textarea она растёт вниз, а не тянет селект и кнопку.
+===== */
 .input-area {
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
   align-items: flex-start;
+  margin-bottom: 16px;
 }
 
+/* textarea занимает всё свободное пространство, счётчик под ним */
 .input-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-/* ===== Строка с селектом приоритета ===== */
-.input-top-row {
-  display: flex;
-  align-items: center;
+  min-width: 0; /* предотвращаем выход за границы flex-контейнера */
 }
 
 /* ===== Селект приоритета ===== */
 .priority-select {
+  flex-shrink: 0;            /* не сжимается */
   font-size: 13px;
-  padding: 4px 8px;
+  padding: 0 8px;
+  height: 44px;              /* та же высота, что у textarea и кнопки */
   border: 2px solid var(--select-border);
-  border-radius: 6px;
+  border-radius: 8px;
   background-color: var(--select-bg);
   color: var(--text-primary);
   cursor: pointer;
@@ -189,8 +191,11 @@ h1 {
   border-color: var(--accent);
 }
 
+/* ===== Кнопка Добавить ===== */
 .input-area button {
-  padding: 10px 18px;
+  flex-shrink: 0;
+  padding: 0 18px;
+  height: 44px;              /* та же высота, что у select */
   font-size: 16px;
   background-color: var(--accent);
   color: white;
@@ -308,7 +313,6 @@ h1 {
   transform: scaleY(1.05);
 }
 
-/* Выполненная задача: полупрозрачная метка */
 .task-item.done .priority-badge {
   opacity: 0.3;
 }

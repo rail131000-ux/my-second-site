@@ -12,15 +12,19 @@
 
       <h1>Мой список задач</h1>
 
+      <!--
+        Структура блока ввода:
+        [select] [textarea растягивается] [Добавить]
+        Счётчик символов под textarea в отдельной строчке
+      -->
       <div class="input-area">
+        <select id="prioritySelect" class="priority-select" title="Приоритет задачи">
+          <option value="low">🟢 Низкий</option>
+          <option value="medium" selected>🟡 Средний</option>
+          <option value="high">🔴 Высокий</option>
+        </select>
+
         <div class="input-wrapper">
-          <div class="input-top-row">
-            <select id="prioritySelect" class="priority-select" title="Приоритет задачи">
-              <option value="low">🟢 Низкий</option>
-              <option value="medium" selected>🟡 Средний</option>
-              <option value="high">🔴 Высокий</option>
-            </select>
-          </div>
           <textarea
             id="taskInput"
             class="task-textarea"
@@ -30,6 +34,7 @@
           ></textarea>
           <span id="charCounter" class="char-counter">0 / 100</span>
         </div>
+
         <button id="addBtn">Добавить</button>
       </div>
 
