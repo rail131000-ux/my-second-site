@@ -1,23 +1,32 @@
-const taskInput = document.getElementById('taskInput');
-const addBtn = document.getElementById('addBtn');
-const taskList = document.getElementById('taskList');
-const filterBtns = document.querySelectorAll('.filter-btn');
-const counter = document.getElementById('counter');
-const themeToggle = document.getElementById('themeToggle');
+const taskInput    = document.getElementById('taskInput');
+const addBtn       = document.getElementById('addBtn');
+const taskList     = document.getElementById('taskList');
+const filterBtns   = document.querySelectorAll('.filter-btn');
+const counter      = document.getElementById('counter');
+const themeToggle  = document.getElementById('themeToggle');
 const clearDoneBtn = document.getElementById('clearDoneBtn');
-const charCounter = document.getElementById('charCounter');
-const prioritySelect = document.getElementById('prioritySelect');
+const charCounter  = document.getElementById('charCounter');
+const priorityTabs = document.querySelectorAll('.priority-tab');
 
 const MAX_LENGTH = 100;
-let currentFilter = 'all';
-
-// Настройки приоритетов: цвет, название, эмодзи
+let currentFilter   = 'all';
+let currentPriority = 'low'; // Дефолт — низкий
 
 const PRIORITIES = {
-  low:    { label: 'Низкий',  emoji: '🟢', color: '#38a169' },
-  medium: { label: 'Средний', emoji: '🟡', color: '#d69e2e' },
-  high:   { label: 'Высокий', emoji: '🔴', color: '#e53e3e' },
+  low:    { label: 'Низкий',  color: '#38a169' },
+  medium: { label: 'Средний', color: '#d69e2e' },
+  high:   { label: 'Высокий', color: '#e53e3e' },
 };
+
+// ========== Табы приоритета ==========
+
+priorityTabs.forEach(function (tab) {
+  tab.addEventListener('click', function () {
+    priorityTabs.forEach(function (t) { t.classList.remove('active'); });
+    tab.classList.add('active');
+    currentPriority = tab.dataset.priority;
+  });
+});
 
 // ========== Авторасширение textarea ==========
 
@@ -51,11 +60,11 @@ function applyTheme(isDark) {
   if (isDark) {
     document.body.classList.add('dark');
     themeToggle.textContent = '☀️';
-    themeToggle.title = 'Переключить на светлую тему';
+    themeToggle.title = 'Светлая тема';
   } else {
     document.body.classList.remove('dark');
     themeToggle.textContent = '🌙';
-    themeToggle.title = 'Переключить на тёмную тему';
+    themeToggle.title = 'Тёмная тема';
   }
 }
 
@@ -68,7 +77,7 @@ themeToggle.addEventListener('click', function () {
   localStorage.setItem('theme', !isDark ? 'dark' : 'light');
 });
 
-// ========== Работа с localStorage ==========
+// ========== localStorage ==========
 
 function loadTasks() {
   const saved = localStorage.getItem('tasks');
@@ -82,7 +91,7 @@ function saveTasks() {
     tasks.push({
       text:     li.querySelector('.task-text').textContent,
       done:     li.classList.contains('done'),
-      priority: li.dataset.priority || 'medium',
+      priority: li.dataset.priority || 'low',
     });
   });
   localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -91,17 +100,13 @@ function saveTasks() {
 // ========== Счётчик задач ==========
 
 function updateCounter() {
-  const all = taskList.querySelectorAll('.task-item');
+  const all      = taskList.querySelectorAll('.task-item');
   const doneItems = taskList.querySelectorAll('.task-item.done');
   const activeCount = all.length - doneItems.length;
 
-  if (all.length === 0) {
-    counter.textContent = '';
-  } else if (activeCount === 0) {
-    counter.textContent = 'Все задачи выполнены! ✅';
-  } else {
-    counter.textContent = 'Осталось задач: ' + activeCount;
-  }
+  if (all.length === 0)       counter.textContent = '';
+  else if (activeCount === 0) counter.textContent = 'Все задачи выполнены! ✅';
+  else                        counter.textContent = 'Осталось: ' + activeCount;
 
   clearDoneBtn.style.display = doneItems.length > 0 ? 'block' : 'none';
 }
@@ -109,16 +114,11 @@ function updateCounter() {
 // ========== Фильтрация ==========
 
 function applyFilter() {
-  const items = taskList.querySelectorAll('.task-item');
-  items.forEach(function (li) {
+  taskList.querySelectorAll('.task-item').forEach(function (li) {
     const isDone = li.classList.contains('done');
-    if (currentFilter === 'all') {
-      li.classList.remove('hidden');
-    } else if (currentFilter === 'active') {
-      li.classList.toggle('hidden', isDone);
-    } else if (currentFilter === 'done') {
-      li.classList.toggle('hidden', !isDone);
-    }
+    if      (currentFilter === 'all')    li.classList.remove('hidden');
+    else if (currentFilter === 'active') li.classList.toggle('hidden', isDone);
+    else if (currentFilter === 'done')   li.classList.toggle('hidden', !isDone);
   });
 }
 
@@ -131,7 +131,7 @@ filterBtns.forEach(function (btn) {
   });
 });
 
-// ========== Удаление с анимацией ==========
+// ========== Удаление ==========
 
 function removeTask(li) {
   li.classList.add('removing');
@@ -145,16 +145,11 @@ function removeTask(li) {
 // ========== Очистка выполненных ==========
 
 clearDoneBtn.addEventListener('click', function () {
-  const confirmed = confirm('Удалить все выполненные задачи?');
-  if (!confirmed) return;
-
-  const doneItems = taskList.querySelectorAll('.task-item.done');
-  doneItems.forEach(function (li) {
+  if (!confirm('Удалить все выполненные задачи?')) return;
+  taskList.querySelectorAll('.task-item.done').forEach(function (li) {
     li.classList.add('removing');
     li.addEventListener('animationend', function () {
-      li.remove();
-      saveTasks();
-      updateCounter();
+      li.remove(); saveTasks(); updateCounter();
     }, { once: true });
   });
 });
@@ -181,24 +176,19 @@ function addDragListeners(li) {
     dragOverItem = null;
   });
 
-  li.addEventListener('dragover', function (event) {
-    event.preventDefault();
+  li.addEventListener('dragover', function (e) {
+    e.preventDefault();
     if (li === draggedItem) return;
     if (dragOverItem) dragOverItem.classList.remove('drag-over');
     dragOverItem = li;
     li.classList.add('drag-over');
   });
 
-  li.addEventListener('drop', function (event) {
-    event.preventDefault();
+  li.addEventListener('drop', function (e) {
+    e.preventDefault();
     if (!draggedItem || li === draggedItem) return;
-    const rect = li.getBoundingClientRect();
-    const midY = rect.top + rect.height / 2;
-    if (event.clientY < midY) {
-      taskList.insertBefore(draggedItem, li);
-    } else {
-      taskList.insertBefore(draggedItem, li.nextSibling);
-    }
+    const midY = li.getBoundingClientRect().top + li.getBoundingClientRect().height / 2;
+    taskList.insertBefore(draggedItem, e.clientY < midY ? li : li.nextSibling);
     saveTasks();
   });
 }
@@ -208,8 +198,7 @@ function addDragListeners(li) {
 let taskIdCounter = 0;
 
 function createTaskElement(text, done, animate, priority) {
-  // Если приоритет не передан или неизвестен, используем medium
-  const p = PRIORITIES[priority] ? priority : 'medium';
+  const p = PRIORITIES[priority] ? priority : 'low';
 
   const li = document.createElement('li');
   li.classList.add('task-item');
@@ -219,21 +208,18 @@ function createTaskElement(text, done, animate, priority) {
 
   addDragListeners(li);
 
-  // ========== Цветовая метка приоритета ==========
-
+  // Цветовая полоска приоритета
   const badge = document.createElement('span');
   badge.classList.add('priority-badge');
   badge.title = 'Приоритет: ' + PRIORITIES[p].label + '. Нажмите, чтобы сменить';
   badge.style.backgroundColor = PRIORITIES[p].color;
 
-  // Клик по метке переключает приоритет по кругу: low → medium → high → low
   badge.addEventListener('click', function () {
     const order = ['low', 'medium', 'high'];
-    const currentIndex = order.indexOf(li.dataset.priority);
-    const nextPriority = order[(currentIndex + 1) % order.length];
-    li.dataset.priority = nextPriority;
-    badge.style.backgroundColor = PRIORITIES[nextPriority].color;
-    badge.title = 'Приоритет: ' + PRIORITIES[nextPriority].label + '. Нажмите, чтобы сменить';
+    const next = order[(order.indexOf(li.dataset.priority) + 1) % order.length];
+    li.dataset.priority = next;
+    badge.style.backgroundColor = PRIORITIES[next].color;
+    badge.title = 'Приоритет: ' + PRIORITIES[next].label + '. Нажмите, чтобы сменить';
     saveTasks();
   });
 
@@ -264,16 +250,14 @@ function createTaskElement(text, done, animate, priority) {
   label.appendChild(checkbox);
   label.appendChild(span);
 
-  // ========== Кнопка редактирования ==========
-
+  // Редактирование
   const editBtn = document.createElement('button');
   editBtn.classList.add('edit-btn');
   editBtn.textContent = '✏️';
-  editBtn.title = 'Редактировать задачу';
+  editBtn.title = 'Редактировать';
 
   editBtn.addEventListener('click', function () {
     const currentText = span.textContent;
-
     const input = document.createElement('input');
     input.type = 'text';
     input.classList.add('edit-input');
@@ -289,15 +273,11 @@ function createTaskElement(text, done, animate, priority) {
     const saveBtn = document.createElement('button');
     saveBtn.classList.add('save-btn');
     saveBtn.textContent = '✅';
-    saveBtn.title = 'Сохранить изменения';
+    saveBtn.title = 'Сохранить';
 
     function saveEdit() {
       const newText = input.value.trim();
-      if (newText === '') {
-        alert('Текст задачи не может быть пустым!');
-        input.focus();
-        return;
-      }
+      if (!newText) { alert('Текст не может быть пустым!'); input.focus(); return; }
       span.textContent = newText;
       span.style.display = '';
       input.remove();
@@ -307,9 +287,9 @@ function createTaskElement(text, done, animate, priority) {
     }
 
     saveBtn.addEventListener('click', saveEdit);
-    input.addEventListener('keydown', function (event) {
-      if (event.key === 'Enter') saveEdit();
-      if (event.key === 'Escape') {
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') saveEdit();
+      if (e.key === 'Escape') {
         span.style.display = '';
         input.remove();
         saveBtn.remove();
@@ -319,8 +299,6 @@ function createTaskElement(text, done, animate, priority) {
 
     li.insertBefore(saveBtn, deleteBtn);
   });
-
-  // ========== Кнопка удаления ==========
 
   const deleteBtn = document.createElement('button');
   deleteBtn.classList.add('delete-btn');
@@ -333,17 +311,13 @@ function createTaskElement(text, done, animate, priority) {
   return li;
 }
 
-// ========== Добавление новой задачи ==========
+// ========== Добавление задачи ==========
 
 function addTask() {
   const text = taskInput.value.trim();
-  if (text === '') {
-    alert('Введите текст задачи!');
-    return;
-  }
+  if (!text) { alert('Введите текст задачи!'); return; }
 
-  const priority = prioritySelect.value;
-  const li = createTaskElement(text, false, true, priority);
+  const li = createTaskElement(text, false, true, currentPriority);
   taskList.appendChild(li);
   saveTasks();
   applyFilter();
@@ -356,23 +330,17 @@ function addTask() {
   taskInput.focus();
 }
 
-// ========== Загрузка при открытии страницы ==========
+// ========== Загрузка ==========
 
 loadTasks().forEach(function (task) {
-  const li = createTaskElement(task.text, task.done, false, task.priority);
-  taskList.appendChild(li);
+  taskList.appendChild(createTaskElement(task.text, task.done, false, task.priority));
 });
 
 applyFilter();
 updateCounter();
 
-// ========== Обработчики событий ==========
-
 addBtn.addEventListener('click', addTask);
 
-taskInput.addEventListener('keydown', function (event) {
-  if (event.key === 'Enter' && !event.shiftKey) {
-    event.preventDefault();
-    addTask();
-  }
+taskInput.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addTask(); }
 });

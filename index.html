@@ -12,30 +12,29 @@
 
       <h1>Мой список задач</h1>
 
-      <!-- Блок ввода -->
       <div class="input-area">
 
-        <!-- Селект приоритета: фиксированная ширина слева -->
-        <select id="prioritySelect" class="priority-select" title="Приоритет">
-          <option value="low">🟢 Низкий</option>
-          <option value="medium" selected>🟡 Средний</option>
-          <option value="high">🔴 Высокий</option>
-        </select>
-
-        <!-- Поле ввода + счётчик -->
-        <div class="input-wrapper">
-          <textarea
-            id="taskInput"
-            class="task-textarea"
-            placeholder="Введите задачу..."
-            maxlength="100"
-            rows="1"
-          ></textarea>
-          <span id="charCounter" class="char-counter">0 / 100</span>
+        <!-- Три таба приоритета -->
+        <div class="priority-tabs">
+          <button class="priority-tab active" data-priority="low">🟢 Низкий</button>
+          <button class="priority-tab" data-priority="medium">🟡 Средний</button>
+          <button class="priority-tab" data-priority="high">🔴 Высокий</button>
         </div>
 
-        <!-- Кнопка -->
-        <button id="addBtn" class="add-btn">Добавить</button>
+        <!-- Поле ввода -->
+        <textarea
+          id="taskInput"
+          class="task-textarea"
+          placeholder="Введите задачу..."
+          maxlength="100"
+          rows="3"
+        ></textarea>
+
+        <!-- Нижняя строка: счётчик + кнопка -->
+        <div class="input-bottom-row">
+          <span id="charCounter" class="char-counter">0 / 100</span>
+          <button id="addBtn" class="add-btn">Добавить</button>
+        </div>
 
       </div>
 
