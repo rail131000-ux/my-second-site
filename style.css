@@ -210,7 +210,7 @@ h1 {
   background-color: var(--bg-task);
   border: 1px solid var(--border-task);
   transition: background-color 0.2s, opacity 0.2s, transform 0.2s;
-  cursor: grab; /* лапка — подсказка что элемент можно перетащить */
+  cursor: grab;
 }
 
 .task-item.hidden {
@@ -224,15 +224,15 @@ h1 {
 
 /* ===== Задача, которую сейчас тащим ===== */
 .task-item.dragging {
-  opacity: 0.4;     /* полупрозрачная — видно, что место занято */
-  cursor: grabbing; /* курсор меняется на зажатую лапку */
+  opacity: 0.4;
+  cursor: grabbing;
 }
 
 /* ===== Задача, над которой находится курсор во время перетаскивания ===== */
 .task-item.drag-over {
-  border-color: var(--accent);        /* синяя рамка */
-  background-color: var(--bg-filter); /* лёгкая подсветка фона */
-  transform: scale(1.01);             /* чуть увеличивается */
+  border-color: var(--accent);
+  background-color: var(--bg-filter);
+  transform: scale(1.01);
 }
 
 /* ===== Задача в процессе удаления ===== */
@@ -365,12 +365,37 @@ h1 {
   transition: background-color 0.3s, color 0.3s;
 }
 
+/* ===== Нижняя панель: счётчик + кнопка очистки ===== */
+.bottom-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  min-height: 24px;
+}
+
 /* ===== Счётчик задач ===== */
 .counter {
-  margin-top: 16px;
-  text-align: center;
+  margin: 0;
   font-size: 14px;
   color: var(--text-counter);
+}
+
+/* ===== Кнопка очистки выполненных ===== */
+.clear-done-btn {
+  background: none;
+  border: none;
+  color: var(--delete-color);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.clear-done-btn:hover {
+  background-color: var(--delete-color);
+  color: white;
 }
 
 /* ===== Анимация появления задачи ===== */
